@@ -1,6 +1,6 @@
 enum ViewType { realTime, daily, monthly, marker, ranking }
 
-/// Menu item for MarkerView: name, unit price, total sales, total orders (for marketing strategy).
+/// Top-selling menu row: name, unit price, total sales (revenue), total orders (qty).
 class MenuItem {
   final String id;
   final String name;

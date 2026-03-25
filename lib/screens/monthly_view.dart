@@ -596,6 +596,12 @@ class MonthlyViewState extends State<MonthlyView> with AutomaticKeepAliveClientM
     return '${_windowStart!.day}-${_windowEnd!.day}';
   }
 
+  /// Exposes current window boundaries for other tabs (e.g. TopMenu).
+  DateTime? get windowStart => _windowStart;
+
+  /// Exposes current window boundaries for other tabs (e.g. TopMenu).
+  DateTime? get windowEnd => _windowEnd;
+
   bool get canNavigatePrevious {
     if (_loading) return false;
     final now = DateTime.now();

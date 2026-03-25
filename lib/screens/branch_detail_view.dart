@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
 import 'daily_settlement_view.dart';
-import 'marker_view.dart';
+import 'topmenu_view.dart';
 import 'monthly_view.dart';
 import 'ranking_view.dart';
 
@@ -82,6 +82,10 @@ class _BranchDetailViewState extends State<BranchDetailView> with SingleTickerPr
       animation: _tabController,
       builder: (context, _) {
         final showMonthlyTrailing = _effectiveTabIndex() == 1;
+        // Top menu should always show current month (MTD), not the sliding monthly window.
+        final now = DateTime.now();
+        final topMenuStartDate = DateTime(now.year, now.month, 1);
+        final topMenuEndDate = DateTime(now.year, now.month, now.day);
         return Scaffold(
           backgroundColor: surfaceColor,
           appBar: AppBar(
@@ -155,7 +159,11 @@ class _BranchDetailViewState extends State<BranchDetailView> with SingleTickerPr
                           if (mounted) setState(() {});
                         },
                       ),
-                      const MarkerView(),
+                      TopMenuView(
+                        branchId: widget.branchId,
+                        startDate: topMenuStartDate,
+                        endDate: topMenuEndDate,
+                      ),
                       const RankingView(),
                     ],
                   ),

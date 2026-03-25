@@ -1,21 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../constants/mock_data.dart';
 import '../generated/app_localizations.dart';
 import '../models/types.dart';
+import '../services/top_menu_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/skeleton_box.dart';
 
 final _currencyFmt = NumberFormat.currency(locale: 'en_PH', symbol: '₱', decimalDigits: 0);
 
-class MarkerView extends StatefulWidget {
-  const MarkerView({super.key});
+/// Top-selling menu items (PyServer `/api/analytics/top-selling`), same idea as restoAdmin [MenuReport] top block.
+class TopMenuView extends StatefulWidget {
+  const TopMenuView({
+    super.key,
+    this.branchId = '0',
+    this.startDate,
+    this.endDate,
+  });
+
+  /// Branch id for analytics; `0` = all branches.
+  final String branchId;
+  final DateTime? startDate;
+  final DateTime? endDate;
 
   @override
-  State<MarkerView> createState() => _MarkerViewState();
+  State<TopMenuView> createState() => _TopMenuViewState();
 }
 
-class _MarkerViewState extends State<MarkerView> {
+class _TopMenuViewState extends State<TopMenuView> {
   bool _loading = true;
   List<MenuItem> _menuItems = [];
 
@@ -25,10 +36,29 @@ class _MarkerViewState extends State<MarkerView> {
     _load();
   }
 
-  void _load() {
+  @override
+  void didUpdateWidget(TopMenuView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldStartMs = oldWidget.startDate?.millisecondsSinceEpoch;
+    final newStartMs = widget.startDate?.millisecondsSinceEpoch;
+    final oldEndMs = oldWidget.endDate?.millisecondsSinceEpoch;
+    final newEndMs = widget.endDate?.millisecondsSinceEpoch;
+    if (oldWidget.branchId != widget.branchId || oldStartMs != newStartMs || oldEndMs != newEndMs) {
+      _load();
+    }
+  }
+
+  Future<void> _load() async {
     setState(() => _loading = true);
+    final items = await TopMenuService.instance.fetchTopMenu(
+      branchId: widget.branchId,
+      start: widget.startDate,
+      end: widget.endDate,
+      limit: 10,
+    );
+    if (!mounted) return;
     setState(() {
-      _menuItems = mockMenuItems.take(10).toList();
+      _menuItems = items;
       _loading = false;
     });
   }
@@ -48,7 +78,21 @@ class _MarkerViewState extends State<MarkerView> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 48),
             child: Center(
-              child: Text('No menu items', style: TextStyle(fontSize: 18, color: Colors.grey[500])),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'No top-selling items for this period.',
+                    style: TextStyle(fontSize: 16, color: Colors.grey[500]),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: _load,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -95,12 +139,10 @@ class _MarkerViewState extends State<MarkerView> {
         SliverToBoxAdapter(child: SizedBox(height: bottomInset)),
       ],
     );
-    // Ensure bounded height so viewport does not get 0.0<=h<=Infinity (avoids RenderViewport assertion).
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxHeight.isFinite) return scrollContent;
         final fullHeight = MediaQuery.sizeOf(context).height;
-        // Portrait/mobile: viewport must fit in visible area (below header, above bottom nav) so we can scroll content fully.
         const kHeaderHeight = 80.0;
         const kBottomNavHeight = 80.0;
         final viewportHeight = width < 1024
@@ -119,9 +161,18 @@ class _MarkerViewState extends State<MarkerView> {
       children: [
         Icon(Icons.restaurant_menu, color: primaryIndigo, size: 28),
         const SizedBox(width: 10),
-        Text(l10n.menuTitle, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-        const Spacer(),
-        Text('${l10n.menuTotalItems} ', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.grey[400])),
+        Expanded(
+          child: Text(
+            l10n.menuTitle,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        Text(
+          '${l10n.menuTotalItems} ',
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.grey[400]),
+        ),
         Text('$total', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
       ],
     );
@@ -163,36 +214,36 @@ class _MarkerViewState extends State<MarkerView> {
               crossAxisSpacing: gridParams.spacing,
               childAspectRatio: gridParams.aspectRatio,
             ),
-          delegate: SliverChildBuilderDelegate(
-            (context, i) => Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: borderColor),
+            delegate: SliverChildBuilderDelegate(
+              (context, i) => Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: borderColor),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        SkeletonBox(width: 28, height: 28, borderRadius: 8),
+                        const SizedBox(width: 8),
+                        Expanded(child: SkeletonBox(height: 16, borderRadius: 4)),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    _skeletonRow(),
+                    const SizedBox(height: 6),
+                    _skeletonRow(),
+                    const SizedBox(height: 6),
+                    _skeletonRow(),
+                  ],
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      SkeletonBox(width: 28, height: 28, borderRadius: 8),
-                      const SizedBox(width: 8),
-                      Expanded(child: SkeletonBox(height: 16, borderRadius: 4)),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  _skeletonRow(),
-                  const SizedBox(height: 6),
-                  _skeletonRow(),
-                  const SizedBox(height: 6),
-                  _skeletonRow(),
-                ],
-              ),
+              childCount: 10,
             ),
-            childCount: 10,
           ),
-        ),
         ),
       ],
     );
@@ -215,7 +266,6 @@ class _MarkerViewState extends State<MarkerView> {
   }
 }
 
-/// Responsive grid params: portrait tablet 2–3 cols, landscape 4 cols; spacing and aspect ratio tuned per breakpoint.
 class _GridParams {
   const _GridParams({
     required this.crossAxisCount,
@@ -227,7 +277,6 @@ class _GridParams {
   final double spacing;
 }
 
-// Approximate card content height; aspectRatio = cardWidth/this so cell height follows. Larger value = taller card.
 const double _kMenuCardContentHeight = 220.0;
 
 _GridParams _gridParamsForWidth(double width, bool isTabletLandscape) {
@@ -248,7 +297,6 @@ _GridParams _gridParamsForWidth(double width, bool isTabletLandscape) {
     cols = 4;
   }
   final cardWidth = (width - horizontalPad - spacing * (cols - 1)) / cols;
-  // Landscape: use taller card height so 2-col layout has good proportion
   final contentHeight = isTabletLandscape ? 320.0 : _kMenuCardContentHeight;
   final aspectRatio = cardWidth / contentHeight;
   return _GridParams(crossAxisCount: cols, aspectRatio: aspectRatio, spacing: spacing);
@@ -260,24 +308,6 @@ double _horizontalPaddingForWidth(double width) {
   return 24;
 }
 
-/// Returns localized menu item name by id (EN/KO).
-String _menuItemName(AppLocalizations l10n, String id) {
-  switch (id) {
-    case '1': return l10n.menuBulgogi;
-    case '2': return l10n.menuKimchiStew;
-    case '3': return l10n.menuBibimbap;
-    case '4': return l10n.menuTteokbokki;
-    case '5': return l10n.menuJapchae;
-    case '6': return l10n.menuSamgyeopsal;
-    case '7': return l10n.menuGimbap;
-    case '8': return l10n.menuGalbi;
-    case '9': return l10n.menuJjajangmyeon;
-    case '10': return l10n.menuNaengmyeon;
-    default: return id;
-  }
-}
-
-/// Menu data card: rank, name, price, total sales, total orders. Visual hierarchy + progress bar.
 class _MenuDataCard extends StatelessWidget {
   const _MenuDataCard({
     required this.rank,
@@ -307,147 +337,143 @@ class _MenuDataCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-          // Rank + menu name
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 28,
-                height: 28,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: primaryIndigo.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: primaryIndigo.withValues(alpha: 0.35)),
-                ),
-                child: Text(
-                  '$rank',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  _menuItemName(l10n, item.id),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    letterSpacing: 0.2,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          // Total Sales — hero block (dark + subtle indigo)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: primaryIndigo.withValues(alpha: 0.2)),
-            ),
-            child: Row(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(6),
+                  width: 28,
+                  height: 28,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: primaryIndigo.withValues(alpha: 0.15),
+                    color: primaryIndigo.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: primaryIndigo.withValues(alpha: 0.35)),
                   ),
-                  child: Icon(Icons.trending_up_rounded, color: primaryIndigo.withValues(alpha: 0.9), size: 18),
+                  child: Text(
+                    '$rank',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        l10n.menuTotalSales,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[400],
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        _currencyFmt.format(item.totalSales),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: 0.2,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                  child: Text(
+                    item.name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: 0.2,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 8),
-          // Price & Orders — icon pills
-          Row(
-            children: [
-              Expanded(
-                child: _statPill(
-                  icon: Icons.payments_rounded,
-                  label: l10n.menuPrice,
-                  value: _currencyFmt.format(item.price),
-                ),
+            const SizedBox(height: 18),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: primaryIndigo.withValues(alpha: 0.2)),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _statPill(
-                  icon: Icons.receipt_long_rounded,
-                  label: l10n.menuTotalOrders,
-                  value: '${item.totalOrders}',
-                ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: primaryIndigo.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.trending_up_rounded, color: primaryIndigo.withValues(alpha: 0.9), size: 18),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          l10n.menuTotalSales,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[400],
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          _currencyFmt.format(item.totalSales),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 0.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          // Sales vs top — progress bar
-          Row(
-            children: [
-              Icon(Icons.bar_chart_rounded, size: 12, color: Colors.grey[500]),
-              const SizedBox(width: 4),
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: salesRatio,
-                    minHeight: 5,
-                    backgroundColor: Colors.white.withValues(alpha: 0.08),
-                    valueColor: AlwaysStoppedAnimation<Color>(primaryIndigo.withValues(alpha: 0.7)),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _statPill(
+                    icon: Icons.payments_rounded,
+                    label: l10n.menuPrice,
+                    value: _currencyFmt.format(item.price),
                   ),
                 ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                '${(salesRatio * 100).round()}%',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.grey[400],
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _statPill(
+                    icon: Icons.receipt_long_rounded,
+                    label: l10n.menuTotalOrders,
+                    value: '${item.totalOrders}',
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Icon(Icons.bar_chart_rounded, size: 12, color: Colors.grey[500]),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: salesRatio,
+                      minHeight: 5,
+                      backgroundColor: Colors.white.withValues(alpha: 0.08),
+                      valueColor: AlwaysStoppedAnimation<Color>(primaryIndigo.withValues(alpha: 0.7)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${(salesRatio * 100).round()}%',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey[400],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

@@ -1,19 +1,5 @@
 import '../models/types.dart';
 
-/// Top 10 menu items for MarkerView: price, total sales, total orders (for marketing strategy).
-final mockMenuItems = <MenuItem>[
-  MenuItem(id: '1', name: 'Bulgogi', price: 450, totalSales: 892500, totalOrders: 1983),
-  MenuItem(id: '2', name: 'Kimchi Stew', price: 380, totalSales: 684000, totalOrders: 1800),
-  MenuItem(id: '3', name: 'Bibimbap', price: 420, totalSales: 630000, totalOrders: 1500),
-  MenuItem(id: '4', name: 'Tteokbokki', price: 280, totalSales: 504000, totalOrders: 1800),
-  MenuItem(id: '5', name: 'Japchae', price: 350, totalSales: 455000, totalOrders: 1300),
-  MenuItem(id: '6', name: 'Samgyeopsal', price: 520, totalSales: 624000, totalOrders: 1200),
-  MenuItem(id: '7', name: 'Gimbap', price: 220, totalSales: 396000, totalOrders: 1800),
-  MenuItem(id: '8', name: 'Galbi', price: 680, totalSales: 476000, totalOrders: 700),
-  MenuItem(id: '9', name: 'Jjajangmyeon', price: 320, totalSales: 384000, totalOrders: 1200),
-  MenuItem(id: '10', name: 'Naengmyeon', price: 400, totalSales: 360000, totalOrders: 900),
-];
-
 /// Mock "ongoing games" repurposed as restaurant branches: account = branch name, table = branch code, gameType = service type, buyIn = sales, cashOut = expenses, status = Open/Settling(Closing).
 /// Branch names from stat cards: ESSOM, 김형제, 블루문, 다래정, 금호반점, 신규.
 final mockOngoingGames = <OngoingGame>[

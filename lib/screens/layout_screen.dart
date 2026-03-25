@@ -18,7 +18,7 @@ import '../platform_init_stub.dart' if (dart.library.io) '../platform_init_io.da
 import 'real_time_view.dart';
 import 'daily_settlement_view.dart';
 import 'monthly_view.dart';
-import 'marker_view.dart';
+import 'topmenu_view.dart';
 import 'ranking_view.dart';
 
 List<(ViewType, String, IconData)> navItems(BuildContext context) {
@@ -317,7 +317,7 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
       case ViewType.monthly:
         return const MonthlyView();
       case ViewType.marker:
-        return const MarkerView();
+        return const TopMenuView();
       case ViewType.ranking:
         return const RankingView();
     }
