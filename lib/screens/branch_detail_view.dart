@@ -4,7 +4,7 @@ import '../theme/app_theme.dart';
 import 'daily_settlement_view.dart';
 import 'topmenu_view.dart';
 import 'monthly_view.dart';
-import 'ranking_view.dart';
+import 'expenses_view.dart';
 
 /// Detail screen for a selected branch: header shows branch name, 4 tabs (Weekly, Monthly, Top Menu, Expenses).
 class BranchDetailView extends StatefulWidget {
@@ -164,7 +164,7 @@ class _BranchDetailViewState extends State<BranchDetailView> with SingleTickerPr
                         startDate: topMenuStartDate,
                         endDate: topMenuEndDate,
                       ),
-                      const RankingView(),
+                      ExpensesView(branchId: widget.branchId),
                     ],
                   ),
                 ),

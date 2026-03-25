@@ -19,7 +19,7 @@ import 'real_time_view.dart';
 import 'daily_settlement_view.dart';
 import 'monthly_view.dart';
 import 'topmenu_view.dart';
-import 'ranking_view.dart';
+import 'expenses_view.dart';
 
 List<(ViewType, String, IconData)> navItems(BuildContext context) {
   final l10n = AppLocalizations.of(context);
@@ -319,7 +319,7 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
       case ViewType.marker:
         return const TopMenuView();
       case ViewType.ranking:
-        return const RankingView();
+        return const ExpensesView();
     }
   }
 
