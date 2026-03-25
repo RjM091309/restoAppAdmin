@@ -152,10 +152,34 @@ class RealtimeService {
         final branchId = _toInt(m['branch_id']);
         if (branchId <= 0) return null;
 
+        // RealTime "branch stats" tiles should match Monthly "Sales / Month" and "Profit / Month".
+        // Monthly uses `daily-sales` aggregated over MTD, while `branch-sales` can differ depending on backend logic.
+        final dailySalesUri = Uri.parse(
+          '$analyticsBaseUrl/api/analytics/daily-sales?branch_id=$branchId&start_date=$start&end_date=$end',
+        );
         final expenseUri = Uri.parse(
           '$analyticsBaseUrl/api/analytics/expense-summary?branch_id=$branchId&start_date=$start&end_date=$end',
         );
-        final expenseJson = await _getJson(expenseUri);
+
+        final results = await Future.wait([
+          _getJson(dailySalesUri),
+          _getJson(expenseUri),
+        ]);
+
+        final dailySalesJson = results[0];
+        final expenseJson = results[1];
+
+        int totalSalesFromDaily = 0;
+        if (dailySalesJson != null && dailySalesJson['success'] == true) {
+          final d = dailySalesJson['data'];
+          if (d is Map && d['data'] is List) {
+            for (final item in (d['data'] as List)) {
+              if (item is! Map) continue;
+              totalSalesFromDaily += _toInt(item['total_sales']);
+            }
+          }
+        }
+
         int totalExpense = 0;
         if (expenseJson != null && expenseJson['success'] == true) {
           final expenseData = expenseJson['data'];
@@ -167,7 +191,8 @@ class RealtimeService {
         return BranchPerformanceData(
           id: branchId,
           name: (m['branch_name'] ?? '').toString().trim(),
-          totalSales: _toInt(m['total_sales']),
+          // Fallback to `branch-sales` if daily-sales is empty/unavailable.
+          totalSales: totalSalesFromDaily > 0 ? totalSalesFromDaily : _toInt(m['total_sales']),
           totalExpenses: totalExpense,
           totalOrders: _toInt(m['order_count']),
         );
@@ -191,24 +216,44 @@ class RealtimeService {
       final expenseSummaryUri = Uri.parse(
         '$analyticsBaseUrl/api/analytics/expense-summary?start_date=$start&end_date=$end',
       );
+      // If `daily-sales` returns an empty payload (some backends do this depending on implementation),
+      // fall back to `branch-sales` totals so the "Sales / Month" and "Profit / Month" tiles stay correct.
+      final branchSalesUri = Uri.parse(
+        '$analyticsBaseUrl/api/analytics/branch-sales?start_date=$start&end_date=$end',
+      );
 
       final results = await Future.wait([
         _getJson(dailySalesUri),
         _getJson(expenseSummaryUri),
+        _getJson(branchSalesUri),
       ]);
       final dailySalesJson = results[0];
       final expenseSummaryJson = results[1];
+      final branchSalesJson = results[2];
 
-      int totalSales = 0;
+      int totalSalesFromDaily = 0;
       if (dailySalesJson != null && dailySalesJson['success'] == true) {
         final d = dailySalesJson['data'];
         if (d is Map && d['data'] is List) {
           for (final item in (d['data'] as List)) {
-            final m = Map<String, dynamic>.from((item as Map).cast<String, dynamic>());
-            totalSales += _toInt(m['total_sales']);
+            if (item is! Map) continue;
+            totalSalesFromDaily += _toInt(item['total_sales']);
           }
         }
       }
+
+      int totalSalesFromBranch = 0;
+      if (branchSalesJson != null && branchSalesJson['success'] == true) {
+        final rootData = branchSalesJson['data'];
+        if (rootData is Map && rootData['data'] is List) {
+          for (final row in (rootData['data'] as List)) {
+            if (row is! Map) continue;
+            totalSalesFromBranch += _toInt(row['total_sales']);
+          }
+        }
+      }
+
+      final totalSales = totalSalesFromDaily > 0 ? totalSalesFromDaily : totalSalesFromBranch;
 
       int totalExpenses = 0;
       if (expenseSummaryJson != null && expenseSummaryJson['success'] == true) {

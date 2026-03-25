@@ -266,6 +266,23 @@ class _DailySettlementViewState extends State<DailySettlementView> with Automati
   String? _error;
   DailySettlementResult _result = DailySettlementResult.empty();
 
+  String _salesTodayLabel(AppLocalizations l10n) {
+    // Weekly tab shows "today" summary totals (see BranchPeriodAnalyticsService summaryStart/summaryEnd = today).
+    return l10n.localeName.startsWith('ko') ? '매출 / 오늘' : 'Sales / Today';
+  }
+
+  String _expensesTodayLabel(AppLocalizations l10n) {
+    return l10n.localeName.startsWith('ko') ? '지출 / 오늘' : 'Expenditure / Today';
+  }
+
+  String _profitTodayLabel(AppLocalizations l10n) {
+    return l10n.localeName.startsWith('ko') ? '순익 / 오늘' : 'Profit / Today';
+  }
+
+  String _ordersTodayLabel(AppLocalizations l10n) {
+    return l10n.localeName.startsWith('ko') ? '오늘 주문 수' : 'Orders / Today';
+  }
+
   @override
   bool get wantKeepAlive => true;
 
@@ -463,10 +480,10 @@ class _DailySettlementViewState extends State<DailySettlementView> with Automati
                 crossAxisSpacing: 16,
                 childAspectRatio: 1.85,
                 children: [
-                  _metricTile(l10n.sales, totalSalesStr),
-                  _metricTile(l10n.expenses, totalExpensesStr),
-                  _metricTile(l10n.profit, totalProfitStr, isGreen: r.totalProfit >= 0),
-                  _metricTile(l10n.summaryTotalOrders, '${r.totalOrders}'),
+                  _metricTile(_salesTodayLabel(l10n), totalSalesStr),
+                  _metricTile(_expensesTodayLabel(l10n), totalExpensesStr),
+                  _metricTile(_profitTodayLabel(l10n), totalProfitStr, isGreen: r.totalProfit >= 0),
+                  _metricTile(_ordersTodayLabel(l10n), '${r.totalOrders}'),
                 ],
               );
             },

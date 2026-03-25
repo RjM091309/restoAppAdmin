@@ -1,7 +1,7 @@
 
 
-const String apiBaseUrl = 'http://localhost:2000';
-const String analyticsBaseUrl = 'http://localhost:2100';
+const String apiBaseUrl = 'http://45.32.119.62:2000';
+const String analyticsBaseUrl = 'http://45.32.119.62:2100';
 
 String get loginApiUrl => '$apiBaseUrl/api/login';
 
