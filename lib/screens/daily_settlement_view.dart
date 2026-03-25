@@ -466,7 +466,7 @@ class _DailySettlementViewState extends State<DailySettlementView> with Automati
                   _metricTile(l10n.sales, totalSalesStr),
                   _metricTile(l10n.expenses, totalExpensesStr),
                   _metricTile(l10n.profit, totalProfitStr, isGreen: r.totalProfit >= 0),
-                  _metricTile(l10n.totalGames, '${r.totalOrders}'),
+                  _metricTile(l10n.summaryTotalOrders, '${r.totalOrders}'),
                 ],
               );
             },

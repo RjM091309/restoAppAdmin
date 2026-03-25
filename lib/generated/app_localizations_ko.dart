@@ -184,19 +184,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get monthDecember => '12월';
 
   @override
-  String get totalBuyIn => '총 매출';
-
-  @override
-  String get avgRolling => '총 거래액';
-
-  @override
-  String get winRate => '순이익/손실';
-
-  @override
   String get netProfit => '순이익';
 
   @override
-  String get totalGames => '총 주문';
+  String get summaryTotalOrders => '총 주문 수';
 
   @override
   String get numberOfGamesWinLoss => '주간 매출';

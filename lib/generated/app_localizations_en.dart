@@ -185,19 +185,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get monthDecember => 'December';
 
   @override
-  String get totalBuyIn => 'Sales';
-
-  @override
-  String get avgRolling => 'Gross Receipts';
-
-  @override
-  String get winRate => 'Net Profit/Loss';
-
-  @override
   String get netProfit => 'Net Profit';
 
   @override
-  String get totalGames => 'Total Orders';
+  String get summaryTotalOrders => 'Total orders';
 
   @override
   String get numberOfGamesWinLoss => 'Weekly Sales';

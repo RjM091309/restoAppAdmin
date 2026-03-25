@@ -317,12 +317,6 @@ class BranchPeriodAnalyticsService {
         totalExpenses: totalExpenses,
         totalProfit: totalProfit,
         totalOrders: totalOrders,
-        totalBuyIn: totalSales,
-        totalGames: totalOrders,
-        totalRolling: totalExpenses,
-        avgRolling: totalOrders > 0 ? totalSales / totalOrders : 0.0,
-        totalWinLoss: totalProfit,
-        winRatePercent: totalSales > 0 ? (totalProfit / totalSales) * 100 : 0.0,
       );
     } catch (_) {
       return DailySettlementResult.empty();

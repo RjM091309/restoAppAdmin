@@ -853,11 +853,11 @@ class MonthlyViewState extends State<MonthlyView> with AutomaticKeepAliveClientM
     }
     final r = _result;
     final fmtCurr = NumberFormat.currency(locale: 'en_PH', symbol: '₱', decimalDigits: 0);
-    final totalBuyInStr = fmtCurr.format(r.totalBuyIn);
-    final dailyRollingStr = fmtCurr.format(r.totalRolling);
-    final dailyWlStr = r.totalWinLoss >= 0
-        ? '+${fmtCurr.format(r.totalWinLoss)}'
-        : '-${fmtCurr.format(r.totalWinLoss.abs())}';
+    final totalSalesStr = fmtCurr.format(r.totalSales);
+    final totalExpensesStr = fmtCurr.format(r.totalExpenses);
+    final totalProfitStr = r.totalProfit >= 0
+        ? '+${fmtCurr.format(r.totalProfit)}'
+        : '-${fmtCurr.format(r.totalProfit.abs())}';
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -874,10 +874,10 @@ class MonthlyViewState extends State<MonthlyView> with AutomaticKeepAliveClientM
                 crossAxisSpacing: 16,
                 childAspectRatio: 1.85,
                 children: [
-                  _metricTile(l10n.totalBuyIn, totalBuyInStr),
-                  _metricTile(l10n.avgRolling, dailyRollingStr),
-                  _metricTile(l10n.netProfit, dailyWlStr, isGreen: r.totalWinLoss >= 0),
-                  _metricTile(l10n.totalGames, '${r.totalGames}'),
+                  _metricTile(l10n.sales, totalSalesStr),
+                  _metricTile(l10n.expenses, totalExpensesStr),
+                  _metricTile(l10n.profit, totalProfitStr, isGreen: r.totalProfit >= 0),
+                  _metricTile(l10n.summaryTotalOrders, '${r.totalOrders}'),
                 ],
               );
             },

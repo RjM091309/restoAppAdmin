@@ -440,35 +440,17 @@ abstract class AppLocalizations {
   /// **'December'**
   String get monthDecember;
 
-  /// No description provided for @totalBuyIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Sales'**
-  String get totalBuyIn;
-
-  /// No description provided for @avgRolling.
-  ///
-  /// In en, this message translates to:
-  /// **'Gross Receipts'**
-  String get avgRolling;
-
-  /// No description provided for @winRate.
-  ///
-  /// In en, this message translates to:
-  /// **'Net Profit/Loss'**
-  String get winRate;
-
   /// No description provided for @netProfit.
   ///
   /// In en, this message translates to:
   /// **'Net Profit'**
   String get netProfit;
 
-  /// No description provided for @totalGames.
+  /// No description provided for @summaryTotalOrders.
   ///
   /// In en, this message translates to:
-  /// **'Total Orders'**
-  String get totalGames;
+  /// **'Total orders'**
+  String get summaryTotalOrders;
 
   /// No description provided for @numberOfGamesWinLoss.
   ///
