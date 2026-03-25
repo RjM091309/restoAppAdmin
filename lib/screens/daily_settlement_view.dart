@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../generated/app_localizations.dart';
 import '../services/daily_settlement_service.dart';
+import '../models/types.dart';
 import '../theme/app_theme.dart';
+import '../widgets/active_view_scope.dart';
 import '../widgets/skeleton_box.dart';
 
 String _fmt(num v) {
@@ -262,6 +265,7 @@ class DailySettlementView extends StatefulWidget {
 
 class _DailySettlementViewState extends State<DailySettlementView> with AutomaticKeepAliveClientMixin {
   bool _chartAnimate = false;
+  bool _wasActive = false;
   bool _loading = true;
   String? _error;
   DailySettlementResult _result = DailySettlementResult.empty();
@@ -293,6 +297,27 @@ class _DailySettlementViewState extends State<DailySettlementView> with Automati
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Register dependency so we get called when activeView changes.
+    final active = ActiveViewScope.maybeOf(context)?.activeView;
+    if (active == null) return;
+    final isActiveNow = active == ViewType.daily;
+    if (isActiveNow && !_wasActive && _result.days.isNotEmpty) {
+      _restartChartAnimation();
+    }
+    _wasActive = isActiveNow;
+  }
+
+  void _restartChartAnimation() {
+    if (!mounted) return;
+    setState(() => _chartAnimate = false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _chartAnimate = true);
+    });
+  }
+
+  @override
   void didUpdateWidget(DailySettlementView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.branchId != widget.branchId) {
@@ -304,7 +329,6 @@ class _DailySettlementViewState extends State<DailySettlementView> with Automati
     setState(() {
       _loading = true;
       _error = null;
-      _chartAnimate = false;
     });
     try {
       final result = await DailySettlementService.instance.fetch(branchId: widget.branchId);
@@ -313,9 +337,7 @@ class _DailySettlementViewState extends State<DailySettlementView> with Automati
         _result = result;
         _loading = false;
       });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) setState(() => _chartAnimate = true);
-      });
+      _restartChartAnimation();
     } catch (_) {
       if (!mounted) return;
       setState(() {

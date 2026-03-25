@@ -151,6 +151,17 @@ class BranchPeriodAnalyticsService {
       final expenseSummaryJson = results[8];
       final branchSalesJson = results[9];
 
+      // If chart endpoints failed (null or success:false), bail out.
+      // Summary endpoints can be flaky; we can still render charts and compute totals with fallbacks.
+      bool ok(Map<String, dynamic>? j) => j != null && j['success'] == true;
+      final requiredFailed =
+          !ok(chartDailySalesJson) ||
+          !ok(chartDailyOrdersJson) ||
+          !ok(chartDailyExpensesJson);
+      if (requiredFailed) {
+        throw Exception('Required analytics endpoint failed');
+      }
+
       final salesByDate = <String, int>{};
       final netByDate = <String, int>{};
       final discountByDate = <String, int>{};

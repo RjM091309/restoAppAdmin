@@ -1,10 +1,13 @@
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../generated/app_localizations.dart';
 import '../services/monthly_service.dart';
+import '../models/types.dart';
 import '../theme/app_theme.dart';
+import '../widgets/active_view_scope.dart';
 import '../widgets/skeleton_box.dart';
 
 String _fmt(num v) {
@@ -579,11 +582,14 @@ class MonthlyView extends StatefulWidget {
 
 class MonthlyViewState extends State<MonthlyView> with AutomaticKeepAliveClientMixin {
   bool _chartAnimate = false;
+  bool _wasActive = false;
   bool _loading = true;
+  bool _periodNavLoading = false;
   String? _error;
   DailySettlementResult _result = DailySettlementResult.empty();
   DateTime? _windowEnd;
   DateTime? _windowStart;
+  int _loadSeq = 0;
 
   @override
   bool get wantKeepAlive => true;
@@ -603,33 +609,39 @@ class MonthlyViewState extends State<MonthlyView> with AutomaticKeepAliveClientM
   DateTime? get windowEnd => _windowEnd;
 
   bool get canNavigatePrevious {
-    if (_loading) return false;
+    if (_loading || _periodNavLoading) return false;
     final now = DateTime.now();
     final startOfMonth = DateTime(now.year, now.month, 1);
     return (_windowStart ?? startOfMonth).isAfter(startOfMonth);
   }
 
   bool get canNavigateNext {
-    if (_loading) return false;
+    if (_loading || _periodNavLoading) return false;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     return (_windowEnd ?? today).isBefore(today);
   }
 
   void navigatePrevious() {
-    if (_loading) return;
+    if (_loading || _periodNavLoading) return;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final nextEnd = (_windowStart ?? today).subtract(const Duration(days: 1));
+    // Lock immediately (before async) to prevent spam taps.
+    setState(() => _periodNavLoading = true);
+    _notifyToolbarChanged();
     _load(overrideWindowEnd: nextEnd);
   }
 
   void navigateNext() {
-    if (_loading) return;
+    if (_loading || _periodNavLoading) return;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final candidateEnd = (_windowEnd ?? today).add(const Duration(days: 10));
     final nextEnd = candidateEnd.isAfter(today) ? today : candidateEnd;
+    // Lock immediately (before async) to prevent spam taps.
+    setState(() => _periodNavLoading = true);
+    _notifyToolbarChanged();
     _load(overrideWindowEnd: nextEnd);
   }
 
@@ -637,6 +649,26 @@ class MonthlyViewState extends State<MonthlyView> with AutomaticKeepAliveClientM
   void initState() {
     super.initState();
     _load();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final active = ActiveViewScope.maybeOf(context)?.activeView;
+    if (active == null) return;
+    final isActiveNow = active == ViewType.monthly;
+    if (isActiveNow && !_wasActive && _result.days.isNotEmpty) {
+      _restartChartAnimation();
+    }
+    _wasActive = isActiveNow;
+  }
+
+  void _restartChartAnimation() {
+    if (!mounted) return;
+    setState(() => _chartAnimate = false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _chartAnimate = true);
+    });
   }
 
   @override
@@ -652,20 +684,24 @@ class MonthlyViewState extends State<MonthlyView> with AutomaticKeepAliveClientM
   /// [overrideWindowEnd] — prev/next: no full-screen skeleton; keep showing previous data until fetch completes.
   Future<void> _load({DateTime? overrideWindowEnd}) async {
     final periodNav = overrideWindowEnd != null;
-    setState(() {
-      _error = null;
-      if (periodNav) {
-        _windowEnd = overrideWindowEnd;
-      } else {
+    final seq = ++_loadSeq;
+    if (periodNav) {
+      setState(() {
+        _error = null;
+        _periodNavLoading = true;
+      });
+    } else {
+      setState(() {
+        _error = null;
         _loading = true;
-        _chartAnimate = false;
-      }
-    });
+        _periodNavLoading = false;
+      });
+    }
     try {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final startOfMonth = DateTime(now.year, now.month, 1);
-      final end = _windowEnd ?? today;
+      final end = overrideWindowEnd ?? _windowEnd ?? today;
       final clampedEnd = end.isAfter(today) ? today : end;
       final startCandidate = clampedEnd.subtract(const Duration(days: 9));
       final start = startCandidate.isBefore(startOfMonth) ? startOfMonth : startCandidate;
@@ -678,28 +714,31 @@ class MonthlyViewState extends State<MonthlyView> with AutomaticKeepAliveClientM
         useWeekdayLabels: false,
       );
       if (!mounted) return;
+      if (seq != _loadSeq) return; // ignore stale/out-of-order responses
+      // If navigation fetch returns empty due to transient backend issues, keep existing data to avoid UI "blink".
+      if (periodNav && result.days.isEmpty && _result.days.isNotEmpty) {
+        setState(() => _periodNavLoading = false);
+        _notifyToolbarChanged();
+        return;
+      }
       setState(() {
         _result = result;
         _windowStart = start;
         _windowEnd = clampedEnd;
         if (!periodNav) {
           _loading = false;
+        } else {
+          _periodNavLoading = false;
         }
       });
       _notifyToolbarChanged();
-      if (!periodNav) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() => _chartAnimate = true);
-        });
-      }
+      if (!periodNav) _restartChartAnimation();
     } catch (_) {
       if (!mounted) return;
+      if (seq != _loadSeq) return;
       if (periodNav) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to load this period')),
-          );
-        }
+        setState(() => _periodNavLoading = false);
+        _notifyToolbarChanged();
       } else {
         setState(() {
           _loading = false;

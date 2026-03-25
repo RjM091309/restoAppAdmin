@@ -424,6 +424,9 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
       body: Container(
         decoration: BoxDecoration(gradient: scaffoldGradient),
         child: SafeArea(
+          // Android init uses immersiveSticky + transparent status bars.
+          // Disabling top SafeArea lets the header reach the very top.
+          top: !platform_init.isAndroid,
         child: Stack(
           children: [
             Row(

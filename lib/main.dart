@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'generated/app_localizations.dart';
 import 'platform_init_stub.dart' if (dart.library.io) 'platform_init_io.dart' as platform_init;
 import 'screens/layout_screen.dart';
+import 'screens/initialize_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/auth_service.dart';
 import 'services/biometric_service.dart';
@@ -107,6 +108,7 @@ class _AuthGate extends StatefulWidget {
 class _AuthGateState extends State<_AuthGate> {
   bool _loading = true;
   bool _isLoggedIn = false;
+  bool _initialized = false;
   bool _pendingFingerprint = false;
   bool _attemptingFingerprint = false;
 
@@ -188,11 +190,17 @@ class _AuthGateState extends State<_AuthGate> {
   }
 
   void _onLoginSuccess() {
-    setState(() => _isLoggedIn = true);
+    setState(() {
+      _isLoggedIn = true;
+      _initialized = false;
+    });
   }
 
   void _onLogout() {
-    setState(() => _isLoggedIn = false);
+    setState(() {
+      _isLoggedIn = false;
+      _initialized = false;
+    });
   }
 
   @override
@@ -225,7 +233,28 @@ class _AuthGateState extends State<_AuthGate> {
       );
     }
     if (_isLoggedIn) {
-      return LayoutScreen(onLogout: _onLogout);
+      return AnimatedSwitcher(
+        duration: const Duration(milliseconds: 450),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        transitionBuilder: (child, animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+        child: !_initialized
+            ? InitializeScreen(
+                key: const ValueKey('init'),
+                onDone: () {
+                  if (mounted) setState(() => _initialized = true);
+                },
+              )
+            : LayoutScreen(
+                key: const ValueKey('layout'),
+                onLogout: _onLogout,
+              ),
+      );
     }
     return LoginScreen(onLoginSuccess: _onLoginSuccess);
   }
