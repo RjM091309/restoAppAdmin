@@ -868,6 +868,20 @@ class MonthlyViewState extends State<MonthlyView> with AutomaticKeepAliveClientM
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (widget.onToolbarChanged == null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: buildMonthlyPeriodToolbar(
+                  rangeText: periodRangeLabel,
+                  canGoPrevious: canNavigatePrevious,
+                  canGoNext: canNavigateNext,
+                  onPrevious: navigatePrevious,
+                  onNext: navigateNext,
+                ),
+              ),
+            ),
           LayoutBuilder(
             builder: (context, constraints) {
               final contentWidth = constraints.maxWidth;

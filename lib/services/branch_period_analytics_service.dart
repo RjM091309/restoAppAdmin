@@ -100,15 +100,22 @@ class BranchPeriodAnalyticsService {
     final summaryEndStr = _toYYYYMMDD(summaryEndDate);
     try {
       final branchIdInt = int.tryParse(branchId) ?? 0;
-      if (branchIdInt <= 0) return DailySettlementResult.empty();
+      final hasBranchFilter = branchIdInt > 0;
 
-      final chartQ = 'branch_id=$branchIdInt&start_date=$chartStartStr&end_date=$chartEndStr';
+      // When branchId == '0', treat as "all branches": omit `branch_id` query param.
+      final chartQ = hasBranchFilter
+          ? 'branch_id=$branchIdInt&start_date=$chartStartStr&end_date=$chartEndStr'
+          : 'start_date=$chartStartStr&end_date=$chartEndStr';
       final rangeDays = chartEndDate.difference(chartStartDate).inDays + 1;
       final previousWeekStartDate = chartStartDate.subtract(Duration(days: rangeDays));
       final previousWeekEndDate = chartStartDate.subtract(const Duration(days: 1));
       final previousWeekQ =
-          'branch_id=$branchIdInt&start_date=${_toYYYYMMDD(previousWeekStartDate)}&end_date=${_toYYYYMMDD(previousWeekEndDate)}';
-      final summaryQ = 'branch_id=$branchIdInt&start_date=$summaryStartStr&end_date=$summaryEndStr';
+          hasBranchFilter
+              ? 'branch_id=$branchIdInt&start_date=${_toYYYYMMDD(previousWeekStartDate)}&end_date=${_toYYYYMMDD(previousWeekEndDate)}'
+              : 'start_date=${_toYYYYMMDD(previousWeekStartDate)}&end_date=${_toYYYYMMDD(previousWeekEndDate)}';
+      final summaryQ = hasBranchFilter
+          ? 'branch_id=$branchIdInt&start_date=$summaryStartStr&end_date=$summaryEndStr'
+          : 'start_date=$summaryStartStr&end_date=$summaryEndStr';
       final chartDailySalesUri = Uri.parse('$analyticsBaseUrl/api/analytics/daily-sales?$chartQ');
       final chartDailyOrdersUri = Uri.parse('$analyticsBaseUrl/api/analytics/daily-orders?$chartQ');
       final chartDailyExpensesUri = Uri.parse('$analyticsBaseUrl/api/analytics/daily-expenses?$chartQ');
