@@ -1,4 +1,4 @@
-package com.example.appcage_flutter
+package com.restoapp.dashboard
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

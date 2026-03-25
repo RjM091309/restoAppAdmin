@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../generated/app_localizations.dart';
 import '../models/realtime_data.dart';
+import 'branch_detail_view.dart';
 import '../services/realtime_service.dart';
 import '../models/types.dart';
 import '../theme/app_theme.dart';
@@ -70,6 +71,9 @@ class RealTimeView extends StatefulWidget {
 class _RealTimeViewState extends State<RealTimeView> {
   final RealtimeService _service = RealtimeService.instance;
   RealtimeData _data = const RealtimeData.empty();
+  List<BranchCardData> _branches = const [];
+  List<BranchPerformanceData> _branchPerformance = const [];
+  DashboardSummaryData _summary = const DashboardSummaryData.empty();
   bool _loading = true;
   Timer? _pollTimer;
 
@@ -78,23 +82,40 @@ class _RealTimeViewState extends State<RealTimeView> {
     super.initState();
     _load();
     // HTTP polling: refresh realtime data for UI. Notifications are created by server-side job only; app just fetches (GET).
-    _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+    _pollTimer = Timer.periodic(const Duration(seconds: 15), (_) {
       if (!mounted) return;
       widget.onPollTick?.call();
-      _service.fetchRealtime().then((data) {
+      Future.wait([
+        _service.fetchBranches(),
+        _service.fetchBranchPerformance(),
+        _service.fetchDashboardSummary(),
+      ]).then((result) {
         if (!mounted) return;
-        setState(() => _data = data);
+        setState(() {
+          _branches = result[0] as List<BranchCardData>;
+          _branchPerformance = result[1] as List<BranchPerformanceData>;
+          _summary = result[2] as DashboardSummaryData;
+        });
       });
     });
   }
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final data = await _service.fetchRealtime();
+    final futures = await Future.wait([
+      _service.fetchBranches(),
+      _service.fetchBranchPerformance(),
+      _service.fetchDashboardSummary(),
+    ]);
+    final branches = futures[0] as List<BranchCardData>;
+    final branchPerformance = futures[1] as List<BranchPerformanceData>;
+    final summary = futures[2] as DashboardSummaryData;
     if (!mounted) return;
     if (ActiveViewScope.find(context)?.activeView != ViewType.realTime) return;
     setState(() {
-      _data = data;
+      _branches = branches;
+      _branchPerformance = branchPerformance;
+      _summary = summary;
       _loading = false;
     });
   }
@@ -106,10 +127,11 @@ class _RealTimeViewState extends State<RealTimeView> {
   }
 
   Widget _buildSkeletonContent(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        LayoutBuilder(
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          LayoutBuilder(
           builder: (context, constraints) {
             final crossAxisCount = constraints.maxWidth > 900 ? 6 : (constraints.maxWidth > 600 ? 3 : 2);
             final isTabletWidth = constraints.maxWidth > 600 && constraints.maxWidth <= 1400;
@@ -162,143 +184,112 @@ class _RealTimeViewState extends State<RealTimeView> {
           ),
         ),
       ],
+      ),
     );
   }
 
   Widget _skeletonStatCard() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-        color: Colors.white.withValues(alpha: 0.03),
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxHeight < 70 || constraints.maxWidth < 140;
+        final padding = isCompact ? 6.0 : 14.0;
+        final spacing = isCompact ? 4.0 : 8.0;
+        final iconSize = isCompact ? 18.0 : 28.0;
+        final lineH = isCompact ? 8.0 : 10.0;
+        final valueH = isCompact ? 12.0 : 18.0;
+        return Container(
+          padding: EdgeInsets.all(padding),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+            color: Colors.white.withValues(alpha: 0.03),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              SkeletonBox(width: 28, height: 28, borderRadius: 10),
-              SizedBox.shrink(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SkeletonBox(width: iconSize, height: iconSize, borderRadius: 10),
+                  const SizedBox.shrink(),
+                ],
+              ),
+              SizedBox(height: spacing),
+              SkeletonBox(width: 70, height: lineH, borderRadius: 4),
+              SizedBox(height: spacing),
+              SkeletonBox(width: 90, height: valueH, borderRadius: 4),
             ],
           ),
-          SizedBox(height: 8),
-          SkeletonBox(width: 70, height: 10, borderRadius: 4),
-          SizedBox(height: 8),
-          SkeletonBox(width: 90, height: 18, borderRadius: 4),
-        ],
+        );
+      },
+    );
+  }
+
+  /// Wraps a StatCard so tapping it opens branch detail (Weekly/Monthly/Top Menu/Expenses).
+  Widget _wrapStatCardTap(BuildContext context, String branchId, String branchName, Widget statCard) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => BranchDetailView.open(
+          context,
+          branchId: branchId,
+          branchName: branchName,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        child: statCard,
       ),
     );
   }
 
-  Widget _buildMobileGameCard(AppLocalizations l10n, OngoingGame game) {
-    final statusLabel = game.status == 'Active' ? l10n.statusActive : l10n.statusSettling;
-    final nameMatch = RegExp(r'^(.+?)\s*\(([^)]+)\)\s*$').firstMatch(game.account);
-    final displayName = nameMatch != null ? nameMatch.group(1)!.trim() : game.account;
-    final codeSubtitle = nameMatch?.group(2)!.trim();
-    
+  /// One card per data: title (매출/월, 지출/월, 순익/월) + value. Right side: trend badge.
+  Widget _buildDataCard(String title, String value, IconData icon, Color color, {String? trendValue, bool? trendIsUp}) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
+        color: Colors.white.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: borderColor),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Trophy/Status Icon
           Container(
-            width: 38,
-            height: 38,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: game.status == 'Active' ? emeraldAccent.withValues(alpha: 0.2) : amberAccent.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(10),
+              color: color.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              game.status == 'Active' ? Icons.emoji_events : Icons.pending,
-              color: game.status == 'Active' ? emeraldAccent : amberAccent,
-              size: 20,
-            ),
+            child: Icon(icon, size: 24, color: color),
           ),
-          const SizedBox(width: 10),
-          // Name and stats column
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Name and Status row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(displayName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: game.status == 'Active' ? emeraldAccent.withValues(alpha: 0.2) : amberAccent.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        statusLabel,
-                        style: TextStyle(
-                          fontSize: 9,
-                          color: game.status == 'Active' ? emeraldAccent : amberAccent,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 3),
-                // Code and Game Type
-                Row(
-                  children: [
-                    if (codeSubtitle != null) ...[
-                      Text(codeSubtitle, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.w500)),
-                      const SizedBox(width: 6),
-                      Text('•', style: TextStyle(fontSize: 10, color: Colors.grey[600])),
-                      const SizedBox(width: 6),
-                    ],
-                    Text(game.gameType, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.w500)),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                // Buy In and Cash Out row
-                Row(
-                  children: [
-                    // Buy In
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(l10n.buyIn.toUpperCase(), style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 0.5)),
-                          const SizedBox(height: 3),
-                          Text(_fmt.format(game.buyIn), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: primaryIndigo)),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Cash Out
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(l10n.cashOut.toUpperCase(), style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 0.5)),
-                          const SizedBox(height: 3),
-                          Text(_fmt.format(game.cashOut), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: amberAccent)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                Text(title, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey[400])),
+                const SizedBox(height: 4),
+                Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
               ],
             ),
           ),
+          if (trendValue != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: (trendIsUp ?? true) ? emeraldAccent.withValues(alpha: 0.2) : roseAccent.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '${(trendIsUp ?? true) ? '+' : '-'}$trendValue',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: (trendIsUp ?? true) ? emeraldAccent : roseAccent,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -307,125 +298,146 @@ class _RealTimeViewState extends State<RealTimeView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    if (_loading && _data.ongoingGames.isEmpty) {
+    if (_loading && _branchPerformance.isEmpty) {
       return _buildSkeletonContent(context);
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final crossAxisCount = constraints.maxWidth > 900 ? 6 : (constraints.maxWidth > 600 ? 3 : 2);
-            final isTabletWidth = constraints.maxWidth > 600 && constraints.maxWidth <= 1400;
-            final aspectRatio = isTabletWidth ? 1.65 : 1.95;
-            final houseBalance = _data.totalChips + _data.cashBalance;
-            return GridView.count(
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final w = constraints.maxWidth;
+              final branchCards = _branchPerformance.isNotEmpty
+                  ? _branchPerformance
+                  : _branches.map((b) => BranchPerformanceData(
+                        id: int.tryParse(b.id) ?? 0,
+                        name: b.name,
+                        totalSales: 0,
+                        totalExpenses: 0,
+                        totalOrders: 0,
+                      )).toList();
+              final sortedBranchCards = [...branchCards]..sort((a, b) {
+                final profitA = a.totalSales - a.totalExpenses;
+                final profitB = b.totalSales - b.totalExpenses;
+                final byProfit = profitB.compareTo(profitA);
+                if (byProfit != 0) return byProfit;
+                final byName = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+                if (byName != 0) return byName;
+                return a.id.compareTo(b.id);
+              });
+              final crossAxisCount = w > 900 ? 6 : (w > 600 ? 3 : 2);
+              final isTabletWidth = w > 600 && w <= 1400;
+              // Mobile: taller cards (smaller ratio) to avoid overflow. Tablet/desktop: 1.65–1.95.
+              final aspectRatio = w < 400 ? 1.35 : (isTabletWidth ? 1.65 : 1.95);
+              return GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisCount: crossAxisCount,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
               childAspectRatio: aspectRatio,
-              children: [
-                StatCard(
-                  label: l10n.totalChips,
-                  value: _fmt.format(_data.totalChips),
-                  icon: Icons.monetization_on,
-                  color: StatCardColor.primary,
-                ),
-                StatCard(
-                  label: l10n.cashBalance,
-                  value: _fmt.format(_data.cashBalance),
-                  icon: Icons.payments,
-                  color: StatCardColor.emerald,
-                ),
-                StatCard(
-                  label: l10n.houseBalance,
-                  value: _fmt.format(houseBalance),
-                  icon: Icons.home_work,
-                  color: StatCardColor.brown,
-                ),
-                StatCard(
-                  label: l10n.netJunketCash,
-                  value: _fmt.format(_data.netJunketCash),
-                  icon: Icons.account_balance_wallet,
-                  color: StatCardColor.rose,
-                ),
-                StatCard(
-                  label: l10n.netJunketMoney,
-                  value: _fmt.format(_data.netJunketMoney),
-                  icon: Icons.account_balance,
-                  color: StatCardColor.amber,
-                ),
-                StatCard(
-                  label: l10n.guestBalance,
-                  value: _fmt.format(_data.guestBalance),
-                  icon: Icons.people,
-                  color: StatCardColor.purple,
-                ),
-              ],
-            );
-          },
-        ),
-        const SizedBox(height: 24),
-        Container(
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.show_chart, size: 18, color: primaryIndigo),
-                        const SizedBox(width: 8),
-                        Text(l10n.ongoingGames, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
-                      ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: primaryIndigo.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
-                      child: Text(l10n.live, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: primaryIndigo)),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 1, color: Colors.white12),
-              Builder(
-                builder: (context) {
-                  // Newest first: sort by table (encoded_dt) descending so new games appear at top
-                  final games = List<OngoingGame>.from(_data.ongoingGames)
-                    ..sort((a, b) => b.table.compareTo(a.table));
-                  if (games.isEmpty) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-                      child: Center(
-                        child: Text(
-                          l10n.noGamesToday,
-                          style: TextStyle(fontSize: 15, color: Colors.grey[500], fontWeight: FontWeight.w500),
-                        ),
+              children: (branchCards.isEmpty
+                  ? [
+                      StatCard(
+                        label: l10n.noBranchesToday,
+                        value: _fmt.format(0),
+                        icon: Icons.store_mall_directory_outlined,
+                        color: StatCardColor.primary,
                       ),
-                    );
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: games.map((g) => _buildMobileGameCard(l10n, g)).toList(),
-                    ),
-                  );
-                },
-              ),
+                    ]
+                  : sortedBranchCards.asMap().entries.map((entry) {
+                final idx = entry.key;
+                final branch = entry.value;
+                final colors = <StatCardColor>[
+                  StatCardColor.primary,
+                  StatCardColor.emerald,
+                  StatCardColor.brown,
+                  StatCardColor.rose,
+                  StatCardColor.amber,
+                  StatCardColor.purple,
+                ];
+                final icons = <IconData>[
+                  Icons.storefront,
+                  Icons.store,
+                  Icons.store_mall_directory,
+                  Icons.home_work,
+                  Icons.location_city,
+                  Icons.apartment,
+                ];
+                final name = branch.name;
+                return _wrapStatCardTap(
+                  context,
+                  branch.id.toString(),
+                  name,
+                  StatCard(
+                    label: name,
+                    value: _fmt.format(branch.totalSales - branch.totalExpenses),
+                    icon: icons[idx % icons.length],
+                    color: colors[idx % colors.length],
+                  ),
+                );
+              }).toList()),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+          Container(
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderColor),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.store, size: 18, color: primaryIndigo),
+                          const SizedBox(width: 8),
+                          Text(l10n.activeBranches, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(color: primaryIndigo.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
+                        child: Text(l10n.live, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: primaryIndigo)),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1, color: Colors.white12),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Builder(
+                    builder: (context) {
+                      final totalSales = _summary.totalSales;
+                      final totalExpenses = _summary.totalExpenses;
+                      final totalProfit = _summary.totalProfit;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildDataCard(l10n.sales, _fmt.format(totalSales), Icons.trending_up_rounded, primaryIndigo, trendValue: '5%', trendIsUp: true),
+                          const SizedBox(height: 12),
+                          _buildDataCard(l10n.expenses, _fmt.format(totalExpenses), Icons.trending_down_rounded, amberAccent, trendValue: '1%', trendIsUp: false),
+                          const SizedBox(height: 12),
+                          _buildDataCard(l10n.profit, _fmt.format(totalProfit), Icons.account_balance_wallet_rounded, emeraldAccent, trendValue: '8%', trendIsUp: true),
+                        ],
+                      );
+                    },
+                  ),
+                ),
             ],
           ),
         ),
-      ],
+        ],
+      ),
     );
   }
 }

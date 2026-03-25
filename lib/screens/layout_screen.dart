@@ -27,8 +27,8 @@ List<(ViewType, String, IconData)> navItems(BuildContext context) {
     (ViewType.realTime, l10n.navGenInfo, Icons.show_chart),
     (ViewType.daily, l10n.navWeekly, Icons.calendar_today),
     (ViewType.monthly, l10n.navMonthly, Icons.bar_chart),
-    (ViewType.marker, l10n.navMarker, Icons.description),
-    (ViewType.ranking, l10n.navPerform, Icons.emoji_events),
+    (ViewType.marker, l10n.menuTitle, Icons.restaurant_menu),
+    (ViewType.ranking, l10n.expensesTitle, Icons.receipt_long),
   ];
 }
 
@@ -80,17 +80,17 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
     _serverStatusSub = ServerStatusService.instance.isOnlineStream.listen((online) {
       if (mounted) setState(() => _isServerOnline = online);
     });
-    NotificationService.onNotificationsChanged = () {
-      if (mounted) _loadNotifications();
-    };
-    // Load notifications on start so red dot shows for unread without opening panel first
-    _loadNotifications();
-    // Poll every 2s on other tabs. On Real Time tab, notifications are synced with ongoing games via RealTimeView.onPollTick (same 3s).
-    _notificationPollTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
-      if (!mounted || _activeView == ViewType.realTime) return;
-      final enabled = await AuthService.instance.getNotificationsEnabled();
-      if (mounted && enabled) _loadNotifications(silent: true);
-    });
+    if (!platform_init.isAndroid) {
+      NotificationService.onNotificationsChanged = () {
+        if (mounted) _loadNotifications();
+      };
+      _loadNotifications();
+      _notificationPollTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
+        if (!mounted || _activeView == ViewType.realTime) return;
+        final enabled = await AuthService.instance.getNotificationsEnabled();
+        if (mounted && enabled) _loadNotifications(silent: true);
+      });
+    }
     _pageController = PageController(initialPage: 0);
     _contentTransitionController = AnimationController(
       vsync: this,
@@ -120,6 +120,7 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (platform_init.isAndroid) return;
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       platform_init.scheduleOneOffNotificationCheck();
     } else if (state == AppLifecycleState.resumed && mounted) {
@@ -134,7 +135,7 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
     _notificationPollTimer?.cancel();
     _toastSlideController.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    NotificationService.onNotificationsChanged = null;
+    if (!platform_init.isAndroid) NotificationService.onNotificationsChanged = null;
     _serverStatusSub?.cancel();
     ServerStatusService.instance.stop();
     _pageController.dispose();
@@ -176,9 +177,11 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
       _notificationsLoading = false;
       _notificationsLoadingMore = false;
     });
+    // Toast disabled: do not show "New activity — check notifications" popup
     if (!append) {
-      final notificationsEnabled = await AuthService.instance.getNotificationsEnabled();
-      final shouldShowToast = mounted && hasNewUnread && notificationsEnabled;
+      // final notificationsEnabled = await AuthService.instance.getNotificationsEnabled();
+      // final shouldShowToast = mounted && hasNewUnread && notificationsEnabled;
+      const shouldShowToast = false;
       if (shouldShowToast) {
         SchedulerBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
@@ -808,12 +811,25 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                   child: const Icon(Icons.dashboard, color: Colors.white, size: 24),
                 ),
                 const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(AppLocalizations.of(context).appTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                    Text(AppLocalizations.of(context).executive, style: TextStyle(fontSize: 10, color: primaryIndigo, fontWeight: FontWeight.w600, letterSpacing: 2)),
-                  ],
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context).headerTitleSalesMonthly,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        AppLocalizations.of(context).executive,
+                        style: TextStyle(fontSize: 10, color: primaryIndigo, fontWeight: FontWeight.w600, letterSpacing: 2),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -929,7 +945,7 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                   child: const Icon(Icons.dashboard, color: Colors.white, size: 18),
                 ),
                 const SizedBox(width: 8),
-                Text(AppLocalizations.of(context).appTitle, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
+                Text(AppLocalizations.of(context).headerTitleSalesMonthly, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
               ],
             ),
           if (!isWide) const Spacer(),
@@ -975,27 +991,28 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
             onPressed: () => setState(() => _languageOpen = true),
             icon: const Icon(Icons.language, color: Colors.grey, size: 24),
           ),
-          IconButton(
-            onPressed: () {
-              setState(() => _notificationOpen = true);
-              _loadNotifications();
-            },
-            icon: Stack(
-              children: [
-                const Icon(Icons.notifications_none, color: Colors.grey, size: 24),
-                if (_notifications.any((n) => !n.isRead))
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(color: roseAccent, shape: BoxShape.circle),
+          if (!platform_init.isAndroid)
+            IconButton(
+              onPressed: () {
+                setState(() => _notificationOpen = true);
+                _loadNotifications();
+              },
+              icon: Stack(
+                children: [
+                  const Icon(Icons.notifications_none, color: Colors.grey, size: 24),
+                  if (_notifications.any((n) => !n.isRead))
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(color: roseAccent, shape: BoxShape.circle),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
           if (!isWide)
             IconButton(
               onPressed: () => setState(() => _profileOpen = true),

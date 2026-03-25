@@ -18,6 +18,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mainMenu => 'MAIN MENU';
 
   @override
+  String get headerTitleSalesMonthly => '6 Restaurant Total Sales & Profit';
+
+  @override
   String get navGenInfo => 'Gen Info';
 
   @override
@@ -182,34 +185,91 @@ class AppLocalizationsEn extends AppLocalizations {
   String get monthDecember => 'December';
 
   @override
-  String get totalBuyIn => 'Buy-in';
+  String get totalBuyIn => 'Sales';
 
   @override
-  String get avgRolling => 'Rolling';
+  String get avgRolling => 'Gross Receipts';
 
   @override
-  String get winRate => 'W/L';
+  String get winRate => 'Net Profit/Loss';
 
   @override
-  String get totalGames => 'Game';
+  String get netProfit => 'Net Profit';
 
   @override
-  String get numberOfGamesWinLoss => 'Weekly - W/L';
+  String get totalGames => 'Total Orders';
 
   @override
-  String get winLossTrend => 'Weekly - W/L';
+  String get numberOfGamesWinLoss => 'Weekly Sales';
 
   @override
-  String get dailyCommission => 'Weekly - Commission';
+  String get winLossTrend => 'Weekly Net';
 
   @override
-  String get junketExpenses => 'Weekly – Expenses';
+  String get dailyCommission => 'Weekly Revenue';
+
+  @override
+  String get monthlySales => 'Monthly Sales';
+
+  @override
+  String get monthlyNet => 'Monthly Net';
+
+  @override
+  String get monthlyRevenue => 'Monthly Revenue';
+
+  @override
+  String get junketExpenses => 'Operating Expenses';
 
   @override
   String get realTimeMarker => 'Real-Time Marker';
 
   @override
   String get totalMarker => 'Total Marker';
+
+  @override
+  String get menuTitle => 'Top Menu';
+
+  @override
+  String get menuTotalItems => 'Items';
+
+  @override
+  String get menuPrice => 'Price';
+
+  @override
+  String get menuTotalSales => 'Total Sales';
+
+  @override
+  String get menuTotalOrders => 'Total Orders';
+
+  @override
+  String get menuBulgogi => 'Bulgogi';
+
+  @override
+  String get menuKimchiStew => 'Kimchi Stew';
+
+  @override
+  String get menuBibimbap => 'Bibimbap';
+
+  @override
+  String get menuTteokbokki => 'Tteokbokki';
+
+  @override
+  String get menuJapchae => 'Japchae';
+
+  @override
+  String get menuSamgyeopsal => 'Samgyeopsal';
+
+  @override
+  String get menuGimbap => 'Gimbap';
+
+  @override
+  String get menuGalbi => 'Galbi';
+
+  @override
+  String get menuJjajangmyeon => 'Jjajangmyeon';
+
+  @override
+  String get menuNaengmyeon => 'Naengmyeon';
 
   @override
   String get activeBalance => 'ACTIVE BALANCE';
@@ -222,6 +282,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guestAgentRanking => 'Guest and Agent Monthly Performance';
+
+  @override
+  String get expensesTitle => 'Expenses';
+
+  @override
+  String get expenseCurrentMonth => 'Current Month';
+
+  @override
+  String get expensePreviousMonth => 'Previous Month';
+
+  @override
+  String get expenseChange => 'Change';
 
   @override
   String get monthlyPerformanceReport =>
@@ -246,22 +318,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commission => 'COMMISSION';
 
   @override
-  String get totalChips => 'Total Chip';
+  String get totalChips => 'ESSOM';
 
   @override
-  String get cashBalance => 'Cash Balance';
+  String get cashBalance => 'Kim\'s B';
 
   @override
-  String get houseBalance => 'House Balance';
+  String get houseBalance => 'Blue M';
 
   @override
-  String get guestBalance => 'Guest Balance';
+  String get guestBalance => 'New';
 
   @override
-  String get netJunketMoney => 'Net Junket Money';
+  String get netJunketMoney => 'KeumHo';
 
   @override
-  String get netJunketCash => 'Net Junket Cash';
+  String get netJunketCash => 'Darejung';
 
   @override
   String get ongoingGames => 'On Going Game';
@@ -295,6 +367,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noGamesToday => 'No Games Today';
+
+  @override
+  String get activeBranches => '6 Restaurant Total Sales & Profit';
+
+  @override
+  String get sales => 'Sales / Month';
+
+  @override
+  String get expenses => 'Expenditure / Month';
+
+  @override
+  String get profit => 'Profit / Month';
+
+  @override
+  String get open => 'Open';
+
+  @override
+  String get closing => 'Closing';
+
+  @override
+  String get noBranchesToday => 'No branches active';
+
+  @override
+  String get branchEssom => 'ESSOM';
+
+  @override
+  String get branchKimHyungje => 'Kim Hyung-je';
+
+  @override
+  String get branchBlueMoon => 'Blue Moon';
+
+  @override
+  String get branchDaraejeong => 'Daraejeong';
+
+  @override
+  String get branchGeumhoBanjeom => 'KeumHo';
+
+  @override
+  String get branchNew => 'New';
 
   @override
   String get language => 'Language';

@@ -1,10 +1,13 @@
 
 
-const String apiBaseUrl = 'https://infinitycage.3core21.com';
+const String apiBaseUrl = 'http://localhost:2000';
+const String analyticsBaseUrl = 'http://localhost:2100';
 
-String get loginApiUrl => '$apiBaseUrl/api/auth/login';
+String get loginApiUrl => '$apiBaseUrl/api/login';
 
-String get realtimeApiUrl => '$apiBaseUrl/api/realtime';
+// Note: restoAdmin backend has no /api/realtime route.
+// Use an existing authenticated endpoint to avoid 404 noise on web.
+String get realtimeApiUrl => '$apiBaseUrl/api/dashboard-data';
 
 String get notificationsApiUrl => '$apiBaseUrl/api/notifications';
 

@@ -93,6 +93,9 @@ class _AppCageAppState extends State<AppCageApp> {
   }
 }
 
+/// When true, skip login and go straight to LayoutScreen (for development/testing).
+const bool _loginDisabled = false;
+
 /// Shows LoginScreen until user has a stored token, then LayoutScreen.
 class _AuthGate extends StatefulWidget {
   const _AuthGate();
@@ -108,10 +111,18 @@ class _AuthGateState extends State<_AuthGate> {
   bool _attemptingFingerprint = false;
 
   Future<void> _checkAuth() async {
+    if (_loginDisabled) {
+      if (!mounted) return;
+      setState(() {
+        _isLoggedIn = true;
+        _loading = false;
+      });
+      return;
+    }
     final token = await AuthService.instance.getToken();
     if (token != null && token.isNotEmpty) {
       final user = await AuthService.instance.getStoredUser();
-      if (user != null && user.permissions != 1) {
+      if (user != null && !AuthService.instance.isAdminOrPermissionOne(user)) {
         await AuthService.instance.logout();
       }
     }
@@ -164,7 +175,9 @@ class _AuthGateState extends State<_AuthGate> {
     if (!mounted) return;
     setState(() {
       _attemptingFingerprint = false;
-      if (user != null && user.permissions == 1) _isLoggedIn = true;
+      if (user != null && AuthService.instance.isAdminOrPermissionOne(user)) {
+        _isLoggedIn = true;
+      }
     });
   }
 

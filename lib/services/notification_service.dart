@@ -3,9 +3,13 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../constants/api_config.dart';
+import '../constants/mock_data.dart';
 import '../models/types.dart';
 import 'auth_service.dart';
 import 'system_notification_stub.dart' if (dart.library.io) 'system_notification_io.dart' as system_notification;
+
+/// When true, notification API is disabled and mock data is used.
+const bool _useMockNotifications = true;
 
 class NotificationService {
   NotificationService._();
@@ -22,6 +26,13 @@ class NotificationService {
 
   /// Fetches notifications with pagination. Returns (list, total). Read state is per user (requires auth).
   Future<({List<NotificationItem> list, int total})> fetchNotifications({int limit = 20, int offset = 0}) async {
+    if (_useMockNotifications) {
+      final total = mockNotifications.length;
+      final end = (offset + limit).clamp(0, total);
+      final start = offset.clamp(0, total);
+      final list = start < end ? mockNotifications.sublist(start, end) : <NotificationItem>[];
+      return (list: list, total: total);
+    }
     try {
       final headers = await _authHeaders();
       final uri = Uri.parse(notificationsApiUrlWithPagination(limit: limit, offset: offset));
@@ -58,6 +69,7 @@ class NotificationService {
 
   /// Clears this user's read state (DELETE /api/notifications). Requires auth.
   Future<bool> clearAll() async {
+    if (_useMockNotifications) return true;
     try {
       final headers = await _authHeaders();
       final res = await http.delete(Uri.parse(notificationsApiUrl), headers: headers);
@@ -69,6 +81,11 @@ class NotificationService {
 
   /// Create one notification (POST /api/notifications). Calls [onNotificationsChanged] on success.
   Future<bool> createNotification({required String title, required String message, String type = 'info'}) async {
+    if (_useMockNotifications) {
+      onNotificationsChanged?.call();
+      system_notification.showSystemNotification(title: title, body: message);
+      return true;
+    }
     try {
       final res = await http.post(
         Uri.parse(notificationsApiUrl),
@@ -88,6 +105,10 @@ class NotificationService {
 
   /// Mark all visible notifications as read for this user. Requires auth.
   Future<bool> markAllAsRead() async {
+    if (_useMockNotifications) {
+      onNotificationsChanged?.call();
+      return true;
+    }
     try {
       final headers = await _authHeaders();
       final res = await http.post(Uri.parse(notificationsMarkAllReadUrl), headers: headers);
@@ -101,6 +122,10 @@ class NotificationService {
 
   /// Hide one notification for this user (swipe to dismiss). DELETE /api/notifications/:id. Requires auth.
   Future<bool> hideNotification(int id) async {
+    if (_useMockNotifications) {
+      onNotificationsChanged?.call();
+      return true;
+    }
     try {
       final headers = await _authHeaders();
       final res = await http.delete(Uri.parse(notificationHideUrl(id)), headers: headers);
@@ -114,6 +139,10 @@ class NotificationService {
 
   /// Mark one notification as read for this user (PATCH /api/notifications/:id). Requires auth.
   Future<bool> markAsRead(int id) async {
+    if (_useMockNotifications) {
+      onNotificationsChanged?.call();
+      return true;
+    }
     try {
       final headers = await _authHeaders();
       headers['Content-Type'] = 'application/json';

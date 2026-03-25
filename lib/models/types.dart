@@ -1,5 +1,22 @@
 enum ViewType { realTime, daily, monthly, marker, ranking }
 
+/// Menu item for MarkerView: name, unit price, total sales, total orders (for marketing strategy).
+class MenuItem {
+  final String id;
+  final String name;
+  final int price;
+  final int totalSales;
+  final int totalOrders;
+
+  const MenuItem({
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.totalSales,
+    required this.totalOrders,
+  });
+}
+
 class OngoingGame {
   final String id;
   final String account;
@@ -24,6 +41,8 @@ class SettlementData {
   final String date;
   final int numGames;
   final int buyIn;
+  final int lastWeekSales;
+  final int lastWeekProfit;
   final int rolling;
   final int winLoss;
   final int commission;
@@ -33,6 +52,8 @@ class SettlementData {
     required this.date,
     required this.numGames,
     required this.buyIn,
+    this.lastWeekSales = 0,
+    this.lastWeekProfit = 0,
     required this.rolling,
     required this.winLoss,
     required this.commission,
@@ -55,6 +76,25 @@ class RankingItem {
     required this.losses,
     required this.commission,
     required this.rank,
+  });
+}
+
+/// Expense category row: rank, name (e.g. 야채류_Vegi), id (e.g. INF397), currentMonth, previousMonth, change.
+class ExpenseCategoryItem {
+  final int rank;
+  final String name;
+  final String categoryId;
+  final int currentMonth;
+  final int previousMonth;
+  final int change;
+
+  const ExpenseCategoryItem({
+    required this.rank,
+    required this.name,
+    required this.categoryId,
+    required this.currentMonth,
+    required this.previousMonth,
+    required this.change,
   });
 }
 

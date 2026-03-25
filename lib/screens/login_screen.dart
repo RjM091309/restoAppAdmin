@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final user = await AuthService.instance.login(username: username, password: password);
     if (!mounted) return;
     final l10n = AppLocalizations.of(context);
-    if (user != null && user.permissions == 1) {
+    if (user != null && AuthService.instance.isAdminOrPermissionOne(user)) {
       widget.onLoginSuccess();
     } else {
       await AuthService.instance.clearRememberMe();
@@ -129,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final user = await AuthService.instance.login(username: username, password: password);
     if (!mounted) return;
     if (user != null) {
-      if (user.permissions != 1) {
+      if (!AuthService.instance.isAdminOrPermissionOne(user)) {
         await AuthService.instance.logout();
         if (!mounted) return;
         setState(() {
@@ -175,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Padding(
                         padding: const EdgeInsets.all(24),
                         child: Opacity(
-                          opacity: 0.55,
+                          opacity: 1,
                           child: Image.asset(
                             'assets/images/login.png',
                             height: 250,

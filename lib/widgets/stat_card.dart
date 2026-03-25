@@ -13,6 +13,8 @@ class StatCard extends StatelessWidget {
   final StatCardColor color;
   final String? trendValue;
   final bool? trendIsUp;
+  /// Shown on the right side of the card (e.g. chevron) to fill empty space.
+  final Widget? trailing;
 
   const StatCard({
     super.key,
@@ -24,6 +26,7 @@ class StatCard extends StatelessWidget {
     this.color = StatCardColor.primary,
     this.trendValue,
     this.trendIsUp,
+    this.trailing,
   });
 
   Color get _colorValue {
@@ -48,6 +51,7 @@ class StatCard extends StatelessWidget {
         final padding = isCompact ? 8.0 : (isTabletSize ? 16.0 : 14.0);
         final spacing = isCompact ? 4.0 : 8.0;
         final valueFontSize = isCompact ? 14.0 : 18.0;
+        final labelFontSize = isCompact ? 13.0 : 17.0;
         return Container(
           padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
@@ -62,90 +66,97 @@ class StatCard extends StatelessWidget {
               ],
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(isCompact ? 4 : 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(icon, size: isCompact ? 14 : 16, color: _colorValue),
-                  ),
-                  if (trendValue != null)
-                    Flexible(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: (trendIsUp ?? true) ? emeraldAccent.withValues(alpha: 0.2) : roseAccent.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '${(trendIsUp ?? true) ? '+' : '-'}$trendValue',
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: (trendIsUp ?? true) ? emeraldAccent : roseAccent,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(isCompact ? 4 : 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          overflow: TextOverflow.ellipsis,
+                          child: Icon(icon, size: isCompact ? 14 : 16, color: _colorValue),
                         ),
-                      ),
-                    ),
-                ],
-              ),
-              SizedBox(height: spacing),
-              Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: Text(
-                  label.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                    color: Colors.grey[400],
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: DefaultTextStyle(
-                      style: TextStyle(
-                        fontSize: valueFontSize,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                      child: valueWidget ??
-                          Text(
-                            value,
+                        SizedBox(width: isCompact ? 6 : 10),
+                        Expanded(
+                          child: Text(
+                            label.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: labelFontSize,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.0,
+                              color: Colors.grey[400],
+                            ),
+                            overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
+                        ),
+                        if (trendValue != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: (trendIsUp ?? true) ? emeraldAccent.withValues(alpha: 0.2) : roseAccent.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '${(trendIsUp ?? true) ? '+' : '-'}$trendValue',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: (trendIsUp ?? true) ? emeraldAccent : roseAccent,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                      ],
                     ),
-                  ),
+                    SizedBox(height: spacing),
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 34, right: 8),
+                          child: DefaultTextStyle(
+                            style: TextStyle(
+                              fontSize: valueFontSize,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            child: valueWidget ??
+                                Text(
+                                  value,
+                                  maxLines: 1,
+                                ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (subValue != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          subValue!,
+                          style: TextStyle(fontSize: 9, color: Colors.grey[500]),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              if (subValue != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Text(
-                    subValue!,
-                    style: TextStyle(fontSize: 9, color: Colors.grey[500]),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                ),
+              if (trailing != null) ...[
+                const SizedBox(width: 8),
+                trailing!,
+              ],
             ],
           ),
         );

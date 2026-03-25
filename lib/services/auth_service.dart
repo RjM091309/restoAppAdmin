@@ -82,8 +82,8 @@ class AuthService {
       if (json == null) return null;
       final success = json['success'] == true;
       if (!success) return null;
-      final token = json['token']?.toString();
-      final userMap = json['user'];
+      final token = (json['token'] ?? json['tokens']?['accessToken'])?.toString();
+      final userMap = json['user'] ?? json['data'];
       if (token == null || token.isEmpty || userMap is! Map) return null;
       final user = AuthUser(
         username: (userMap['username'] ?? '').toString(),
@@ -107,6 +107,12 @@ class AuthService {
     } catch (_) {
       return null;
     }
+  }
+
+  bool isAdminOrPermissionOne(AuthUser user) {
+    if (user.permissions == 1) return true;
+    final normalizedRole = user.role.trim().toLowerCase();
+    return normalizedRole == 'admin' || normalizedRole == 'administrator';
   }
 
   /// Clear stored auth (logout).

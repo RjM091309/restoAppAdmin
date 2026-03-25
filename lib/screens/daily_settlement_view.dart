@@ -16,23 +16,19 @@ String _fmtWL(int v) {
   return v >= 0 ? '+$s' : '-$s';
 }
 
-class _VerticalGamesWlBar extends StatelessWidget {
+class _HorizontalWeeklySalesBar extends StatelessWidget {
   final String date;
-  final int numGames;
-  final int winLoss;
-  final int maxGames;
-  final int minWL;
-  final int maxWL;
+  final int thisWeekSales;
+  final int lastWeekSales;
+  final int maxSales;
   final bool animate;
   final bool isExpanded;
 
-  const _VerticalGamesWlBar({
+  const _HorizontalWeeklySalesBar({
     required this.date,
-    required this.numGames,
-    required this.winLoss,
-    required this.maxGames,
-    required this.minWL,
-    required this.maxWL,
+    required this.thisWeekSales,
+    required this.lastWeekSales,
+    required this.maxSales,
     required this.animate,
     this.isExpanded = false,
   });
@@ -42,31 +38,23 @@ class _VerticalGamesWlBar extends StatelessWidget {
     final media = MediaQuery.sizeOf(context);
     final isCompact = media.width < 360;
     final isSmall = media.width < 400;
-    final labelFontSize = isExpanded ? 16.0 : (isCompact ? 10.0 : (isSmall ? 11.0 : 13.0));
-    final wlFontSize = isExpanded ? 15.0 : (isCompact ? 9.0 : (isSmall ? 10.0 : 12.0));
+    final lastWeekFontSize = isExpanded ? 16.0 : (isCompact ? 10.0 : (isSmall ? 11.0 : 13.0));
+    final thisWeekFontSize = isExpanded ? 15.0 : (isCompact ? 9.0 : (isSmall ? 10.0 : 12.0));
     final dateFontSize = isExpanded ? 14.0 : (isCompact ? 9.0 : (isSmall ? 10.0 : 12.0));
     final labelAreaHeight = isCompact ? 44.0 : (isSmall ? 50.0 : 56.0);
     final barMaxWidth = isCompact ? 32.0 : (isSmall ? 40.0 : 48.0);
     final sidePadding = isCompact ? 2.0 : 3.0;
-    final barGap = isCompact ? 2.0 : 3.0;
+    final barGap = 0.0;
     final labelBarGap = isCompact ? 4.0 : 6.0;
     final dateTopGap = isCompact ? 6.0 : 10.0;
 
-    final maxY = (maxGames * 1.15).toDouble();
-    double wlBarRatio() {
-      if (winLoss >= 0) {
-        if (maxWL <= 0) return 0;
-        return (winLoss / maxWL).clamp(0.0, 1.0);
-      }
-      if (minWL >= 0) return 0;
-      return (winLoss.abs() / minWL.abs()).clamp(0.0, 1.0);
-    }
+    final maxY = maxSales <= 0 ? 1.0 : (maxSales * 1.15).toDouble();
 
     return LayoutBuilder(
       builder: (context, c) {
         final barMaxHeight = ((c.maxHeight - labelAreaHeight) * 0.92).clamp(20.0, 200.0);
-        final gamesHeight = (numGames / maxY * barMaxHeight).clamp(0.0, barMaxHeight);
-        final wlHeight = (wlBarRatio() * barMaxHeight).clamp(2.0, barMaxHeight);
+        final thisWeekHeight = (thisWeekSales / maxY * barMaxHeight).clamp(0.0, barMaxHeight);
+        final lastWeekHeight = (lastWeekSales / maxY * barMaxHeight).clamp(0.0, barMaxHeight);
         final rawWidth = c.maxWidth.isFinite ? c.maxWidth : 80.0;
         final maxContentWidth = (rawWidth - sidePadding * 2).clamp(40.0, 500.0);
         final barWidth = ((maxContentWidth - barGap) / 2).clamp(10.0, barMaxWidth);
@@ -89,16 +77,16 @@ class _VerticalGamesWlBar extends StatelessWidget {
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('$numGames', style: TextStyle(fontSize: labelFontSize, fontWeight: FontWeight.w700, color: primaryIndigo)),
+                          Text(_fmt(lastWeekSales), style: TextStyle(fontSize: lastWeekFontSize, fontWeight: FontWeight.w700, color: Colors.grey.shade400)),
                           SizedBox(height: labelBarGap),
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 600),
                             curve: Curves.easeOutCubic,
-                            height: animate ? gamesHeight : 0,
+                            height: animate ? lastWeekHeight : 0,
                             width: barWidth,
                             decoration: BoxDecoration(
-                              color: primaryIndigo,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(5)),
+                              color: Colors.grey.shade500,
+                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(5)),
                             ),
                           ),
                         ],
@@ -107,16 +95,19 @@ class _VerticalGamesWlBar extends StatelessWidget {
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(_fmtWL(winLoss), style: TextStyle(fontSize: wlFontSize, fontWeight: FontWeight.w700, color: winLoss >= 0 ? emeraldAccent : roseAccent)),
+                          Text(_fmt(thisWeekSales), style: TextStyle(fontSize: thisWeekFontSize, fontWeight: FontWeight.w700, color: primaryIndigo)),
                           SizedBox(height: labelBarGap),
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 600),
-                            curve: Curves.easeOutCubic,
-                            height: animate ? wlHeight : 0,
-                            width: barWidth,
-                            decoration: BoxDecoration(
-                              color: winLoss >= 0 ? emeraldAccent : roseAccent,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(5)),
+                          Transform.translate(
+                            offset: const Offset(-0.8, 0),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 600),
+                              curve: Curves.easeOutCubic,
+                              height: animate ? thisWeekHeight : 0,
+                              width: barWidth,
+                              decoration: BoxDecoration(
+                                color: primaryIndigo,
+                                borderRadius: const BorderRadius.only(topRight: Radius.circular(5)),
+                              ),
                             ),
                           ),
                         ],
@@ -141,18 +132,20 @@ class _VerticalGamesWlBar extends StatelessWidget {
   }
 }
 
-class _HorizontalCommissionBar extends StatelessWidget {
+class _HorizontalWeeklyProfitBar extends StatelessWidget {
   final String date;
-  final int commission;
-  final double maxCommission;
+  final int thisWeekProfit;
+  final int lastWeekProfit;
+  final double maxProfitAbs;
   final double barHeight;
   final bool animate;
   final bool isExpanded;
 
-  const _HorizontalCommissionBar({
+  const _HorizontalWeeklyProfitBar({
     required this.date,
-    required this.commission,
-    required this.maxCommission,
+    required this.thisWeekProfit,
+    required this.lastWeekProfit,
+    required this.maxProfitAbs,
     required this.barHeight,
     required this.animate,
     this.isExpanded = false,
@@ -160,10 +153,11 @@ class _HorizontalCommissionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ratio = maxCommission > 0 ? (commission / maxCommission) : 0.0;
+    final thisWeekRatio = maxProfitAbs > 0 ? (thisWeekProfit.abs() / maxProfitAbs) : 0.0;
+    final lastWeekRatio = maxProfitAbs > 0 ? (lastWeekProfit.abs() / maxProfitAbs) : 0.0;
     final fontSize = isExpanded ? 16.0 : 10.0;
     final dateWidth = isExpanded ? 48.0 : 32.0;
-    final valueWidth = isExpanded ? 72.0 : 48.0;
+    final valueWidth = isExpanded ? 92.0 : 72.0;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -176,27 +170,56 @@ class _HorizontalCommissionBar extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, c) {
               final maxW = c.maxWidth;
-              final w = (animate ? maxW * ratio : 0.0).clamp(0.0, maxW);
-              return Stack(
-                alignment: Alignment.centerLeft,
+              final thisWeekW = (animate ? maxW * thisWeekRatio : 0.0).clamp(0.0, maxW);
+              final lastWeekW = (animate ? maxW * lastWeekRatio : 0.0).clamp(0.0, maxW);
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    height: barHeight,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.06),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                  Stack(
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      Container(
+                        height: barHeight,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 600),
+                        curve: Curves.easeOutCubic,
+                        width: thisWeekW,
+                        height: barHeight,
+                        decoration: BoxDecoration(
+                          color: amberAccent,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
                   ),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 600),
-                    curve: Curves.easeOutCubic,
-                    width: w,
-                    height: barHeight,
-                    decoration: BoxDecoration(
-                      color: amberAccent,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
+                  const SizedBox(height: 4),
+                  Stack(
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      Container(
+                        height: barHeight,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 600),
+                        curve: Curves.easeOutCubic,
+                        width: lastWeekW,
+                        height: barHeight,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade500,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               );
             },
@@ -205,10 +228,22 @@ class _HorizontalCommissionBar extends StatelessWidget {
         const SizedBox(width: 8),
         SizedBox(
           width: valueWidth,
-          child: Text(
-            _fmt(commission),
-            style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w600, color: amberAccent),
-            textAlign: TextAlign.right,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _fmtWL(thisWeekProfit),
+                style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w600, color: amberAccent),
+                textAlign: TextAlign.right,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _fmtWL(lastWeekProfit),
+                style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w600, color: Colors.grey.shade400),
+                textAlign: TextAlign.right,
+              ),
+            ],
           ),
         ),
       ],
@@ -217,22 +252,35 @@ class _HorizontalCommissionBar extends StatelessWidget {
 }
 
 class DailySettlementView extends StatefulWidget {
-  const DailySettlementView({super.key});
+  const DailySettlementView({super.key, this.branchId = '0'});
+
+  final String branchId;
 
   @override
   State<DailySettlementView> createState() => _DailySettlementViewState();
 }
 
-class _DailySettlementViewState extends State<DailySettlementView> {
+class _DailySettlementViewState extends State<DailySettlementView> with AutomaticKeepAliveClientMixin {
   bool _chartAnimate = false;
   bool _loading = true;
   String? _error;
   DailySettlementResult _result = DailySettlementResult.empty();
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  @override
+  void didUpdateWidget(DailySettlementView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.branchId != widget.branchId) {
+      _load();
+    }
   }
 
   Future<void> _load() async {
@@ -242,13 +290,12 @@ class _DailySettlementViewState extends State<DailySettlementView> {
       _chartAnimate = false;
     });
     try {
-      final result = await DailySettlementService.instance.fetch();
+      final result = await DailySettlementService.instance.fetch(branchId: widget.branchId);
       if (!mounted) return;
       setState(() {
         _result = result;
         _loading = false;
       });
-      // Trigger chart animation after first build with data (initial spots → final spots)
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(() => _chartAnimate = true);
       });
@@ -262,10 +309,11 @@ class _DailySettlementViewState extends State<DailySettlementView> {
   }
 
   Widget _buildSkeletonContent(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        LayoutBuilder(
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          LayoutBuilder(
           builder: (context, constraints) {
             final count = constraints.maxWidth > 600 ? 4 : 2;
             return GridView.count(
@@ -325,7 +373,8 @@ class _DailySettlementViewState extends State<DailySettlementView> {
             );
           },
         ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -367,8 +416,9 @@ class _DailySettlementViewState extends State<DailySettlementView> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final l10n = AppLocalizations.of(context);
-    if (_loading && _result.days.isEmpty) {
+    if (_loading) {
       return _buildSkeletonContent(context);
     }
     if (_error != null) {
@@ -392,88 +442,82 @@ class _DailySettlementViewState extends State<DailySettlementView> {
     }
     final r = _result;
     final fmtCurr = NumberFormat.currency(locale: 'en_PH', symbol: '₱', decimalDigits: 0);
-    final totalBuyInStr = fmtCurr.format(r.totalBuyIn);
-    final dailyRollingStr = fmtCurr.format(r.totalRolling);
-    final dailyWlStr = r.totalWinLoss >= 0
-        ? '+${fmtCurr.format(r.totalWinLoss)}'
-        : '-${fmtCurr.format(r.totalWinLoss.abs())}';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final contentWidth = constraints.maxWidth;
-            final count = contentWidth > 600 ? 4 : 2;
-            return GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: count,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 1.85,
-              children: [
-                _metricTile(l10n.totalBuyIn, totalBuyInStr),
-                _metricTile(l10n.avgRolling, dailyRollingStr),
-                _metricTile(l10n.winRate, dailyWlStr, isGreen: r.totalWinLoss >= 0),
-                _metricTile(l10n.totalGames, '${r.totalGames}'),
-              ],
-            );
-          },
-        ),
-        SizedBox(height: MediaQuery.sizeOf(context).height > 600 ? 24 : 20),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final media = MediaQuery.sizeOf(context);
-            final contentWidth = constraints.maxWidth;
-            final isPortrait = contentWidth < 600;
-            final spacing = isPortrait ? 28.0 : 20.0;
-            final heightScale = (media.height / 700).clamp(0.85, 1.15);
-            final topRowHeight = (isPortrait ? 360.0 : 320.0) * heightScale;
-            final bottomRowHeight = (isPortrait ? 380.0 : 340.0) * heightScale;
-            if (isPortrait) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+    final totalSalesStr = fmtCurr.format(r.totalSales);
+    final totalExpensesStr = fmtCurr.format(r.totalExpenses);
+    final totalProfitStr = r.totalProfit >= 0
+        ? '+${fmtCurr.format(r.totalProfit)}'
+        : '-${fmtCurr.format(r.totalProfit.abs())}';
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final contentWidth = constraints.maxWidth;
+              final count = contentWidth > 600 ? 4 : 2;
+              return GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: count,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 1.85,
                 children: [
-                  SizedBox(height: topRowHeight, child: _wrapChartTap(context, AppLocalizations.of(context).numberOfGamesWinLoss, _gamesChartCard)),
-                  SizedBox(height: spacing),
-                  SizedBox(height: topRowHeight, child: _wrapChartTap(context, AppLocalizations.of(context).winLossTrend, _winLossTrendCard)),
-                  SizedBox(height: spacing),
-                  SizedBox(height: bottomRowHeight, child: _wrapChartTap(context, AppLocalizations.of(context).dailyCommission, _commissionChartCard)),
-                  SizedBox(height: spacing),
-                  SizedBox(height: bottomRowHeight, child: _wrapChartTap(context, AppLocalizations.of(context).junketExpenses, _expensesChartCard)),
+                  _metricTile(l10n.sales, totalSalesStr),
+                  _metricTile(l10n.expenses, totalExpensesStr),
+                  _metricTile(l10n.profit, totalProfitStr, isGreen: r.totalProfit >= 0),
+                  _metricTile(l10n.totalGames, '${r.totalOrders}'),
                 ],
               );
-            }
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  height: topRowHeight,
-                  child: Row(
-                    children: [
-                      Expanded(child: _wrapChartTap(context, AppLocalizations.of(context).numberOfGamesWinLoss, _gamesChartCard)),
-                      SizedBox(width: spacing),
-                      Expanded(child: _wrapChartTap(context, AppLocalizations.of(context).winLossTrend, _winLossTrendCard)),
-                    ],
+            },
+          ),
+          SizedBox(height: MediaQuery.sizeOf(context).height > 600 ? 24 : 20),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final media = MediaQuery.sizeOf(context);
+              final contentWidth = constraints.maxWidth;
+              final isPortrait = contentWidth < 600;
+              final spacing = isPortrait ? 28.0 : 20.0;
+              final heightScale = (media.height / 700).clamp(0.85, 1.15);
+              final topRowHeight = (isPortrait ? 360.0 : 320.0) * heightScale;
+              final bottomRowHeight = (isPortrait ? 380.0 : 340.0) * heightScale;
+              if (isPortrait) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(height: topRowHeight, child: _wrapChartTap(context, AppLocalizations.of(context).numberOfGamesWinLoss, _gamesChartCard)),
+                    SizedBox(height: spacing),
+                    SizedBox(height: bottomRowHeight, child: _wrapChartTap(context, 'Weekly Profit', _commissionChartCard)),
+                    SizedBox(height: spacing),
+                    SizedBox(height: bottomRowHeight, child: _wrapChartTap(context, AppLocalizations.of(context).junketExpenses, _expensesChartCard)),
+                  ],
+                );
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: topRowHeight,
+                    child: _wrapChartTap(context, AppLocalizations.of(context).numberOfGamesWinLoss, _gamesChartCard),
                   ),
-                ),
-                SizedBox(height: spacing),
-                SizedBox(
-                  height: bottomRowHeight,
-                  child: Row(
-                    children: [
-                      Expanded(child: _wrapChartTap(context, AppLocalizations.of(context).dailyCommission, _commissionChartCard)),
-                      SizedBox(width: spacing),
-                      Expanded(child: _wrapChartTap(context, AppLocalizations.of(context).junketExpenses, _expensesChartCard)),
-                    ],
+                  SizedBox(height: spacing),
+                  SizedBox(
+                    height: bottomRowHeight,
+                    child: Row(
+                      children: [
+                        Expanded(child: _wrapChartTap(context, 'Weekly Profit', _commissionChartCard)),
+                        SizedBox(width: spacing),
+                        Expanded(child: _wrapChartTap(context, AppLocalizations.of(context).junketExpenses, _expensesChartCard)),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            );
-          },
-        ),
-      ],
+                ],
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -486,8 +530,10 @@ class _DailySettlementViewState extends State<DailySettlementView> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(label.toUpperCase(), textAlign: TextAlign.center, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey[500], letterSpacing: 1.0)),
-          const SizedBox(height: 4),
+          if (label.isNotEmpty) ...[
+            Text(label.toUpperCase(), textAlign: TextAlign.center, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey[500], letterSpacing: 1.0)),
+            const SizedBox(height: 4),
+          ],
           Text(value, textAlign: TextAlign.center, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isGreen ? emeraldAccent : Colors.white)),
         ],
       ),
@@ -532,15 +578,15 @@ class _DailySettlementViewState extends State<DailySettlementView> {
   Widget _gamesChartCard(BuildContext context, {bool isExpanded = false, VoidCallback? onClose}) {
     final media = MediaQuery.sizeOf(context);
     final isCompact = media.width < 360;
-    final gapBetweenDays = isCompact ? 4.0 : 6.0;
-    final minWidthPerDay = isCompact ? 20.0 : 24.0;
     final titleSize = isExpanded ? 18.0 : (isCompact ? 13.0 : (media.width < 400 ? 14.0 : 16.0));
     final padding = isCompact ? 12.0 : 16.0;
+    final gapBetweenDays = isCompact ? 4.0 : 6.0;
+    final minWidthPerDay = isCompact ? 20.0 : 24.0;
 
     final days = _result.days;
-    final maxGames = days.isEmpty ? 0 : days.map((e) => e.numGames).reduce((a, b) => a > b ? a : b);
-    final minWL = days.isEmpty ? 0 : days.map((e) => e.winLoss).reduce((a, b) => a < b ? a : b);
-    final maxWL = days.isEmpty ? 0 : days.map((e) => e.winLoss).reduce((a, b) => a > b ? a : b);
+    final thisWeekMaxSales = days.isEmpty ? 0 : days.map((e) => e.buyIn).reduce((a, b) => a > b ? a : b);
+    final lastWeekMaxSales = days.isEmpty ? 0 : days.map((e) => e.lastWeekSales).reduce((a, b) => a > b ? a : b);
+    final maxSales = thisWeekMaxSales > lastWeekMaxSales ? thisWeekMaxSales : lastWeekMaxSales;
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
@@ -565,6 +611,33 @@ class _DailySettlementViewState extends State<DailySettlementView> {
                 Icon(Icons.open_in_full, size: isCompact ? 14 : 18, color: Colors.grey[500]),
             ],
           ),
+          SizedBox(height: isCompact ? 8 : 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _legendDot(primaryIndigo),
+              SizedBox(width: isCompact ? 4 : 6),
+              Text(
+                'This Week',
+                style: TextStyle(
+                  fontSize: isCompact ? 9 : 10,
+                  color: Colors.grey[400],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(width: isCompact ? 10 : 14),
+              _legendDot(Colors.grey.shade500),
+              SizedBox(width: isCompact ? 4 : 6),
+              Text(
+                'Last Week',
+                style: TextStyle(
+                  fontSize: isCompact ? 9 : 10,
+                  color: Colors.grey[400],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
           SizedBox(height: isCompact ? 12 : 16),
           Expanded(
             child: LayoutBuilder(
@@ -581,13 +654,11 @@ class _DailySettlementViewState extends State<DailySettlementView> {
                       if (i > 0) SizedBox(width: gapBetweenDays),
                       SizedBox(
                         width: widthPerDay,
-                        child:                       _VerticalGamesWlBar(
+                        child: _HorizontalWeeklySalesBar(
                           date: days[i].date,
-                          numGames: days[i].numGames,
-                          winLoss: days[i].winLoss,
-                          maxGames: maxGames,
-                          minWL: minWL,
-                          maxWL: maxWL,
+                          thisWeekSales: days[i].buyIn,
+                          lastWeekSales: days[i].lastWeekSales,
+                          maxSales: maxSales,
                           animate: _chartAnimate,
                           isExpanded: isExpanded,
                         ),
@@ -599,6 +670,17 @@ class _DailySettlementViewState extends State<DailySettlementView> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _legendDot(Color color) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
       ),
     );
   }
@@ -773,11 +855,17 @@ class _DailySettlementViewState extends State<DailySettlementView> {
     final isCompact = media.width < 360;
     final padding = isCompact ? 12.0 : 16.0;
     final titleSize = isExpanded ? 18.0 : (isCompact ? 12.0 : (media.width < 400 ? 13.0 : 14.0));
-    final maxBarHeight = isExpanded ? 56.0 : (isCompact ? 36.0 : 44.0);
-    final minBarHeight = isExpanded ? 28.0 : (isCompact ? 18.0 : 24.0);
+    final maxBarHeight = isExpanded ? 34.0 : (isCompact ? 16.0 : 20.0);
+    final minBarHeight = isExpanded ? 16.0 : (isCompact ? 8.0 : 10.0);
 
     final days = _result.days;
-    final maxCommission = days.isEmpty ? 1.0 : days.map((e) => e.commission).reduce((a, b) => a > b ? a : b).toDouble();
+    final maxThisWeekProfitAbs = days.isEmpty
+        ? 1.0
+        : days.map((e) => e.winLoss.abs()).reduce((a, b) => a > b ? a : b).toDouble();
+    final maxLastWeekProfitAbs = days.isEmpty
+        ? 1.0
+        : days.map((e) => e.lastWeekProfit.abs()).reduce((a, b) => a > b ? a : b).toDouble();
+    final maxProfitAbs = maxThisWeekProfitAbs > maxLastWeekProfitAbs ? maxThisWeekProfitAbs : maxLastWeekProfitAbs;
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
@@ -788,7 +876,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
             children: [
               Icon(Icons.handshake, size: isCompact ? 16 : 18, color: amberAccent),
               SizedBox(width: isCompact ? 6 : 8),
-              Expanded(child: Text(AppLocalizations.of(context).dailyCommission, style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white))),
+              Expanded(child: Text('Weekly Profit', style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white))),
               if (isExpanded && onClose != null)
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -803,6 +891,33 @@ class _DailySettlementViewState extends State<DailySettlementView> {
             ],
           ),
           SizedBox(height: isCompact ? 12 : 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _legendDot(amberAccent),
+              SizedBox(width: isCompact ? 4 : 6),
+              Text(
+                'This Week',
+                style: TextStyle(
+                  fontSize: isCompact ? 9 : 10,
+                  color: Colors.grey[400],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(width: isCompact ? 10 : 14),
+              _legendDot(Colors.grey.shade500),
+              SizedBox(width: isCompact ? 4 : 6),
+              Text(
+                'Last Week',
+                style: TextStyle(
+                  fontSize: isCompact ? 9 : 10,
+                  color: Colors.grey[400],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: isCompact ? 12 : 14),
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -811,10 +926,11 @@ class _DailySettlementViewState extends State<DailySettlementView> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     for (int i = 0; i < days.length; i++)
-                      _HorizontalCommissionBar(
+                      _HorizontalWeeklyProfitBar(
                         date: days[i].date,
-                        commission: days[i].commission,
-                        maxCommission: maxCommission,
+                        thisWeekProfit: days[i].winLoss,
+                        lastWeekProfit: days[i].lastWeekProfit,
+                        maxProfitAbs: maxProfitAbs,
                         barHeight: barHeight,
                         animate: _chartAnimate,
                         isExpanded: isExpanded,

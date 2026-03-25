@@ -37,7 +37,8 @@ class ServerStatusService {
 
   Future<void> _runCheck() async {
     try {
-      final uri = Uri.parse(realtimeApiUrl);
+      // Use public base URL for connectivity check to avoid 401 noise from protected endpoints.
+      final uri = Uri.parse(apiBaseUrl);
       final res = await http.get(uri).timeout(_requestTimeout);
       final online = res.statusCode >= 200 && res.statusCode < 500;
       _emit(online);

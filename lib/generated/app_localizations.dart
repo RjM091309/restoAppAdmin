@@ -116,6 +116,12 @@ abstract class AppLocalizations {
   /// **'MAIN MENU'**
   String get mainMenu;
 
+  /// No description provided for @headerTitleSalesMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'6 Restaurant Total Sales & Profit'**
+  String get headerTitleSalesMonthly;
+
   /// No description provided for @navGenInfo.
   ///
   /// In en, this message translates to:
@@ -437,49 +443,73 @@ abstract class AppLocalizations {
   /// No description provided for @totalBuyIn.
   ///
   /// In en, this message translates to:
-  /// **'Buy-in'**
+  /// **'Sales'**
   String get totalBuyIn;
 
   /// No description provided for @avgRolling.
   ///
   /// In en, this message translates to:
-  /// **'Rolling'**
+  /// **'Gross Receipts'**
   String get avgRolling;
 
   /// No description provided for @winRate.
   ///
   /// In en, this message translates to:
-  /// **'W/L'**
+  /// **'Net Profit/Loss'**
   String get winRate;
+
+  /// No description provided for @netProfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Profit'**
+  String get netProfit;
 
   /// No description provided for @totalGames.
   ///
   /// In en, this message translates to:
-  /// **'Game'**
+  /// **'Total Orders'**
   String get totalGames;
 
   /// No description provided for @numberOfGamesWinLoss.
   ///
   /// In en, this message translates to:
-  /// **'Weekly - W/L'**
+  /// **'Weekly Sales'**
   String get numberOfGamesWinLoss;
 
   /// No description provided for @winLossTrend.
   ///
   /// In en, this message translates to:
-  /// **'Weekly - W/L'**
+  /// **'Weekly Net'**
   String get winLossTrend;
 
   /// No description provided for @dailyCommission.
   ///
   /// In en, this message translates to:
-  /// **'Weekly - Commission'**
+  /// **'Weekly Revenue'**
   String get dailyCommission;
+
+  /// No description provided for @monthlySales.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Sales'**
+  String get monthlySales;
+
+  /// No description provided for @monthlyNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Net'**
+  String get monthlyNet;
+
+  /// No description provided for @monthlyRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Revenue'**
+  String get monthlyRevenue;
 
   /// No description provided for @junketExpenses.
   ///
   /// In en, this message translates to:
-  /// **'Weekly – Expenses'**
+  /// **'Operating Expenses'**
   String get junketExpenses;
 
   /// No description provided for @realTimeMarker.
@@ -493,6 +523,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total Marker'**
   String get totalMarker;
+
+  /// No description provided for @menuTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Menu'**
+  String get menuTitle;
+
+  /// No description provided for @menuTotalItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get menuTotalItems;
+
+  /// No description provided for @menuPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get menuPrice;
+
+  /// No description provided for @menuTotalSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Sales'**
+  String get menuTotalSales;
+
+  /// No description provided for @menuTotalOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Orders'**
+  String get menuTotalOrders;
+
+  /// No description provided for @menuBulgogi.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulgogi'**
+  String get menuBulgogi;
+
+  /// No description provided for @menuKimchiStew.
+  ///
+  /// In en, this message translates to:
+  /// **'Kimchi Stew'**
+  String get menuKimchiStew;
+
+  /// No description provided for @menuBibimbap.
+  ///
+  /// In en, this message translates to:
+  /// **'Bibimbap'**
+  String get menuBibimbap;
+
+  /// No description provided for @menuTteokbokki.
+  ///
+  /// In en, this message translates to:
+  /// **'Tteokbokki'**
+  String get menuTteokbokki;
+
+  /// No description provided for @menuJapchae.
+  ///
+  /// In en, this message translates to:
+  /// **'Japchae'**
+  String get menuJapchae;
+
+  /// No description provided for @menuSamgyeopsal.
+  ///
+  /// In en, this message translates to:
+  /// **'Samgyeopsal'**
+  String get menuSamgyeopsal;
+
+  /// No description provided for @menuGimbap.
+  ///
+  /// In en, this message translates to:
+  /// **'Gimbap'**
+  String get menuGimbap;
+
+  /// No description provided for @menuGalbi.
+  ///
+  /// In en, this message translates to:
+  /// **'Galbi'**
+  String get menuGalbi;
+
+  /// No description provided for @menuJjajangmyeon.
+  ///
+  /// In en, this message translates to:
+  /// **'Jjajangmyeon'**
+  String get menuJjajangmyeon;
+
+  /// No description provided for @menuNaengmyeon.
+  ///
+  /// In en, this message translates to:
+  /// **'Naengmyeon'**
+  String get menuNaengmyeon;
 
   /// No description provided for @activeBalance.
   ///
@@ -517,6 +637,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Guest and Agent Monthly Performance'**
   String get guestAgentRanking;
+
+  /// No description provided for @expensesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get expensesTitle;
+
+  /// No description provided for @expenseCurrentMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Month'**
+  String get expenseCurrentMonth;
+
+  /// No description provided for @expensePreviousMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Month'**
+  String get expensePreviousMonth;
+
+  /// No description provided for @expenseChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get expenseChange;
 
   /// No description provided for @monthlyPerformanceReport.
   ///
@@ -563,37 +707,37 @@ abstract class AppLocalizations {
   /// No description provided for @totalChips.
   ///
   /// In en, this message translates to:
-  /// **'Total Chip'**
+  /// **'ESSOM'**
   String get totalChips;
 
   /// No description provided for @cashBalance.
   ///
   /// In en, this message translates to:
-  /// **'Cash Balance'**
+  /// **'Kim\'s B'**
   String get cashBalance;
 
   /// No description provided for @houseBalance.
   ///
   /// In en, this message translates to:
-  /// **'House Balance'**
+  /// **'Blue M'**
   String get houseBalance;
 
   /// No description provided for @guestBalance.
   ///
   /// In en, this message translates to:
-  /// **'Guest Balance'**
+  /// **'New'**
   String get guestBalance;
 
   /// No description provided for @netJunketMoney.
   ///
   /// In en, this message translates to:
-  /// **'Net Junket Money'**
+  /// **'KeumHo'**
   String get netJunketMoney;
 
   /// No description provided for @netJunketCash.
   ///
   /// In en, this message translates to:
-  /// **'Net Junket Cash'**
+  /// **'Darejung'**
   String get netJunketCash;
 
   /// No description provided for @ongoingGames.
@@ -661,6 +805,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No Games Today'**
   String get noGamesToday;
+
+  /// No description provided for @activeBranches.
+  ///
+  /// In en, this message translates to:
+  /// **'6 Restaurant Total Sales & Profit'**
+  String get activeBranches;
+
+  /// No description provided for @sales.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales / Month'**
+  String get sales;
+
+  /// No description provided for @expenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenditure / Month'**
+  String get expenses;
+
+  /// No description provided for @profit.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit / Month'**
+  String get profit;
+
+  /// No description provided for @open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get open;
+
+  /// No description provided for @closing.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing'**
+  String get closing;
+
+  /// No description provided for @noBranchesToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No branches active'**
+  String get noBranchesToday;
+
+  /// No description provided for @branchEssom.
+  ///
+  /// In en, this message translates to:
+  /// **'ESSOM'**
+  String get branchEssom;
+
+  /// No description provided for @branchKimHyungje.
+  ///
+  /// In en, this message translates to:
+  /// **'Kim Hyung-je'**
+  String get branchKimHyungje;
+
+  /// No description provided for @branchBlueMoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue Moon'**
+  String get branchBlueMoon;
+
+  /// No description provided for @branchDaraejeong.
+  ///
+  /// In en, this message translates to:
+  /// **'Daraejeong'**
+  String get branchDaraejeong;
+
+  /// No description provided for @branchGeumhoBanjeom.
+  ///
+  /// In en, this message translates to:
+  /// **'KeumHo'**
+  String get branchGeumhoBanjeom;
+
+  /// No description provided for @branchNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get branchNew;
 
   /// No description provided for @language.
   ///

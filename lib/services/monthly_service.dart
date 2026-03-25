@@ -3,6 +3,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../constants/api_config.dart';
+import '../models/branch_period_result.dart';
+import 'branch_period_analytics_service.dart';
+
+export '../models/branch_period_result.dart';
 
 /// One month's casino rolling for the chart.
 class MonthlyCasinoRolling {
@@ -63,8 +67,29 @@ class MonthlyService {
     'July', 'August', 'September', 'October', 'November', 'December',
   ];
 
-  /// Fetches monthly accumulated for current month and 12 months (Jan–Dec) for casino chart.
-  Future<MonthlyResult> fetch({int? year, int? month}) async {
+  /// PyServer: per-day charts + summary for Monthly tab (sliding window, fullscreen MTD, etc.).
+  Future<DailySettlementResult> fetchPeriodForBranch({
+    required String branchId,
+    DateTime? start,
+    DateTime? end,
+    DateTime? summaryStart,
+    DateTime? summaryEnd,
+    int weekOffset = 0,
+    bool useWeekdayLabels = true,
+  }) {
+    return BranchPeriodAnalyticsService.instance.fetch(
+      branchId: branchId,
+      start: start,
+      end: end,
+      summaryStart: summaryStart,
+      summaryEnd: summaryEnd,
+      weekOffset: weekOffset,
+      useWeekdayLabels: useWeekdayLabels,
+    );
+  }
+
+  /// Node: monthly accumulated aggregates + 12-month casino chart (`/api/monthly-accumulated`, rolling-by-year).
+  Future<MonthlyResult> fetchMonthlyAccumulated({int? year, int? month}) async {
     final now = DateTime.now();
     final y = year ?? now.year;
     final m = month ?? now.month;

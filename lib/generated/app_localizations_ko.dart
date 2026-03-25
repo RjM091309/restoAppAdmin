@@ -18,6 +18,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get mainMenu => '메인 메뉴';
 
   @override
+  String get headerTitleSalesMonthly => '6개 매장 매출 및 순익 현황';
+
+  @override
   String get navGenInfo => '종합정보';
 
   @override
@@ -181,34 +184,91 @@ class AppLocalizationsKo extends AppLocalizations {
   String get monthDecember => '12월';
 
   @override
-  String get totalBuyIn => '바이인';
+  String get totalBuyIn => '총 매출';
 
   @override
-  String get avgRolling => '롤링';
+  String get avgRolling => '총 거래액';
 
   @override
-  String get winRate => '윈/로스';
+  String get winRate => '순이익/손실';
 
   @override
-  String get totalGames => '게임';
+  String get netProfit => '순이익';
 
   @override
-  String get numberOfGamesWinLoss => '주간 통계';
+  String get totalGames => '총 주문';
 
   @override
-  String get winLossTrend => '주간 통계';
+  String get numberOfGamesWinLoss => '주간 매출';
 
   @override
-  String get dailyCommission => '주간 통계';
+  String get winLossTrend => '주간 순이익';
 
   @override
-  String get junketExpenses => '정캣 지출';
+  String get dailyCommission => '주간 수익';
+
+  @override
+  String get monthlySales => '월간 매출';
+
+  @override
+  String get monthlyNet => '월간 순이익';
+
+  @override
+  String get monthlyRevenue => '월간 수익';
+
+  @override
+  String get junketExpenses => '운영 비용';
 
   @override
   String get realTimeMarker => '실시간 마커';
 
   @override
   String get totalMarker => '총 마커';
+
+  @override
+  String get menuTitle => '인기 메뉴';
+
+  @override
+  String get menuTotalItems => '종류';
+
+  @override
+  String get menuPrice => '가격';
+
+  @override
+  String get menuTotalSales => '총 매출';
+
+  @override
+  String get menuTotalOrders => '총 주문';
+
+  @override
+  String get menuBulgogi => '불고기';
+
+  @override
+  String get menuKimchiStew => '김치찌개';
+
+  @override
+  String get menuBibimbap => '비빔밥';
+
+  @override
+  String get menuTteokbokki => '떡볶이';
+
+  @override
+  String get menuJapchae => '잡채';
+
+  @override
+  String get menuSamgyeopsal => '삼겹살';
+
+  @override
+  String get menuGimbap => '김밥';
+
+  @override
+  String get menuGalbi => '갈비';
+
+  @override
+  String get menuJjajangmyeon => '짜장면';
+
+  @override
+  String get menuNaengmyeon => '냉면';
 
   @override
   String get activeBalance => '활성 잔액';
@@ -221,6 +281,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get guestAgentRanking => '게스트 및 에이전트 월간 실적';
+
+  @override
+  String get expensesTitle => '비용';
+
+  @override
+  String get expenseCurrentMonth => '당월';
+
+  @override
+  String get expensePreviousMonth => '전월';
+
+  @override
+  String get expenseChange => '증감';
 
   @override
   String get monthlyPerformanceReport => '월별 누적 실적 보고서';
@@ -244,22 +316,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get commission => '커미션';
 
   @override
-  String get totalChips => '토탈칩';
+  String get totalChips => 'ESSOM';
 
   @override
-  String get cashBalance => '캐시 발렌스';
+  String get cashBalance => '김형제';
 
   @override
-  String get houseBalance => '하우스 발렌스';
+  String get houseBalance => '블루문';
 
   @override
-  String get guestBalance => '게스트 밸런스';
+  String get guestBalance => '신규';
 
   @override
-  String get netJunketMoney => '순 정캣 자산';
+  String get netJunketMoney => '금호반점';
 
   @override
-  String get netJunketCash => '순 정캣 현금';
+  String get netJunketCash => '다래정';
 
   @override
   String get ongoingGames => '진행중인 게임';
@@ -293,6 +365,45 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get noGamesToday => '오늘 게임 없음';
+
+  @override
+  String get activeBranches => '6개 매장 매출 및 순익 현황';
+
+  @override
+  String get sales => '매출 / 월';
+
+  @override
+  String get expenses => '지출 / 월';
+
+  @override
+  String get profit => '순익 / 월';
+
+  @override
+  String get open => '영업 중';
+
+  @override
+  String get closing => '마감 중';
+
+  @override
+  String get noBranchesToday => '영업 중인 매장 없음';
+
+  @override
+  String get branchEssom => 'ESSOM';
+
+  @override
+  String get branchKimHyungje => '김형제';
+
+  @override
+  String get branchBlueMoon => '블루문';
+
+  @override
+  String get branchDaraejeong => '다래정';
+
+  @override
+  String get branchGeumhoBanjeom => '금호반점';
+
+  @override
+  String get branchNew => '신규';
 
   @override
   String get language => '언어';
