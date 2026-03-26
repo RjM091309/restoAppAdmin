@@ -194,6 +194,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get numberOfGamesWinLoss => 'Weekly Sales';
 
   @override
+  String get weeklyProfit => 'Weekly Profit';
+
+  @override
+  String get thisWeek => 'This Week';
+
+  @override
+  String get lastWeek => 'Last Week';
+
+  @override
   String get winLossTrend => 'Weekly Net';
 
   @override
@@ -201,6 +210,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get monthlySales => 'Monthly Sales';
+
+  @override
+  String get monthlyProfit => 'Monthly Profit';
+
+  @override
+  String get thisMonth => 'This Month';
+
+  @override
+  String get lastMonth => 'Last Month';
 
   @override
   String get monthlyNet => 'Monthly Net';

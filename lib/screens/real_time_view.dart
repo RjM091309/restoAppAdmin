@@ -133,9 +133,10 @@ class _RealTimeViewState extends State<RealTimeView> {
         children: [
           LayoutBuilder(
           builder: (context, constraints) {
-            final crossAxisCount = constraints.maxWidth > 900 ? 6 : (constraints.maxWidth > 600 ? 3 : 2);
+            final crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
+            final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
             final isTabletWidth = constraints.maxWidth > 600 && constraints.maxWidth <= 1400;
-            final aspectRatio = isTabletWidth ? 1.65 : 1.95;
+            final aspectRatio = isLandscape ? 2.6 : (isTabletWidth ? 1.65 : 1.95);
             return GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -308,6 +309,7 @@ class _RealTimeViewState extends State<RealTimeView> {
           LayoutBuilder(
             builder: (context, constraints) {
               final w = constraints.maxWidth;
+              final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
               final branchCards = _branchPerformance.isNotEmpty
                   ? _branchPerformance
                   : _branches.map((b) => BranchPerformanceData(
@@ -326,10 +328,10 @@ class _RealTimeViewState extends State<RealTimeView> {
                 if (byName != 0) return byName;
                 return a.id.compareTo(b.id);
               });
-              final crossAxisCount = w > 900 ? 6 : (w > 600 ? 3 : 2);
+              final crossAxisCount = w > 600 ? 3 : 2;
               final isTabletWidth = w > 600 && w <= 1400;
               // Mobile: taller cards (smaller ratio) to avoid overflow. Tablet/desktop: 1.65–1.95.
-              final aspectRatio = w < 400 ? 1.35 : (isTabletWidth ? 1.65 : 1.95);
+              final aspectRatio = isLandscape ? 2.6 : (w < 400 ? 1.35 : (isTabletWidth ? 1.65 : 1.95));
               return GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),

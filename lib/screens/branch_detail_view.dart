@@ -163,6 +163,7 @@ class _BranchDetailViewState extends State<BranchDetailView> with SingleTickerPr
                         branchId: widget.branchId,
                         startDate: topMenuStartDate,
                         endDate: topMenuEndDate,
+                        compactCards: true,
                       ),
                       ExpensesView(branchId: widget.branchId),
                     ],

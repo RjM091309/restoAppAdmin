@@ -458,6 +458,24 @@ abstract class AppLocalizations {
   /// **'Weekly Sales'**
   String get numberOfGamesWinLoss;
 
+  /// No description provided for @weeklyProfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Profit'**
+  String get weeklyProfit;
+
+  /// No description provided for @thisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get thisWeek;
+
+  /// No description provided for @lastWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Week'**
+  String get lastWeek;
+
   /// No description provided for @winLossTrend.
   ///
   /// In en, this message translates to:
@@ -475,6 +493,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Monthly Sales'**
   String get monthlySales;
+
+  /// No description provided for @monthlyProfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Profit'**
+  String get monthlyProfit;
+
+  /// No description provided for @thisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get thisMonth;
+
+  /// No description provided for @lastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Month'**
+  String get lastMonth;
 
   /// No description provided for @monthlyNet.
   ///

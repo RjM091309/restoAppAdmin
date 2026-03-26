@@ -193,6 +193,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get numberOfGamesWinLoss => '주간 매출';
 
   @override
+  String get weeklyProfit => '주간 순이익';
+
+  @override
+  String get thisWeek => '이번 주';
+
+  @override
+  String get lastWeek => '지난 주';
+
+  @override
   String get winLossTrend => '주간 순이익';
 
   @override
@@ -200,6 +209,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get monthlySales => '월간 매출';
+
+  @override
+  String get monthlyProfit => '월간 순이익';
+
+  @override
+  String get thisMonth => '이번 달';
+
+  @override
+  String get lastMonth => '지난 달';
 
   @override
   String get monthlyNet => '월간 순이익';

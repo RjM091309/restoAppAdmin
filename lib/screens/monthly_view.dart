@@ -481,7 +481,7 @@ class _MonthlyProfitFullscreenBodyState extends State<_MonthlyProfitFullscreenBo
             children: [
               Icon(Icons.handshake, size: isCompact ? 16 : 18, color: amberAccent),
               SizedBox(width: isCompact ? 6 : 8),
-              const Expanded(child: Text('Monthly Profit', style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white))),
+              Expanded(child: Text(AppLocalizations.of(context).monthlyProfit, style: const TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white))),
               if (widget.onClose != null)
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -500,7 +500,7 @@ class _MonthlyProfitFullscreenBodyState extends State<_MonthlyProfitFullscreenBo
               _profitLegendDot(amberAccent),
               SizedBox(width: isCompact ? 4 : 6),
               Text(
-                'This Month',
+                AppLocalizations.of(context).thisMonth,
                 style: TextStyle(
                   fontSize: isCompact ? 9 : 10,
                   color: Colors.grey[400],
@@ -511,7 +511,7 @@ class _MonthlyProfitFullscreenBodyState extends State<_MonthlyProfitFullscreenBo
               _profitLegendDot(Colors.grey.shade500),
               SizedBox(width: isCompact ? 4 : 6),
               Text(
-                'Last Month',
+                AppLocalizations.of(context).lastMonth,
                 style: TextStyle(
                   fontSize: isCompact ? 9 : 10,
                   color: Colors.grey[400],
@@ -1089,7 +1089,7 @@ class MonthlyViewState extends State<MonthlyView> with AutomaticKeepAliveClientM
               _legendDot(primaryIndigo),
               SizedBox(width: isCompact ? 4 : 6),
               Text(
-                'This Month',
+                AppLocalizations.of(context).thisMonth,
                 style: TextStyle(
                   fontSize: isCompact ? 9 : 10,
                   color: Colors.grey[400],
@@ -1100,7 +1100,7 @@ class MonthlyViewState extends State<MonthlyView> with AutomaticKeepAliveClientM
               _legendDot(Colors.grey.shade500),
               SizedBox(width: isCompact ? 4 : 6),
               Text(
-                'Last Month',
+                AppLocalizations.of(context).lastMonth,
                 style: TextStyle(
                   fontSize: isCompact ? 9 : 10,
                   color: Colors.grey[400],
@@ -1342,7 +1342,7 @@ class MonthlyViewState extends State<MonthlyView> with AutomaticKeepAliveClientM
             children: [
               Icon(Icons.handshake, size: isCompact ? 16 : 18, color: amberAccent),
               SizedBox(width: isCompact ? 6 : 8),
-              Expanded(child: Text('Monthly Profit', style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white))),
+              Expanded(child: Text(AppLocalizations.of(context).monthlyProfit, style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white))),
               Icon(Icons.open_in_full, size: isCompact ? 14 : 18, color: Colors.grey[500]),
             ],
           ),
@@ -1353,7 +1353,7 @@ class MonthlyViewState extends State<MonthlyView> with AutomaticKeepAliveClientM
               _legendDot(amberAccent),
               SizedBox(width: isCompact ? 4 : 6),
               Text(
-                'This Month',
+                AppLocalizations.of(context).thisMonth,
                 style: TextStyle(
                   fontSize: isCompact ? 9 : 10,
                   color: Colors.grey[400],
@@ -1364,7 +1364,7 @@ class MonthlyViewState extends State<MonthlyView> with AutomaticKeepAliveClientM
               _legendDot(Colors.grey.shade500),
               SizedBox(width: isCompact ? 4 : 6),
               Text(
-                'Last Month',
+                AppLocalizations.of(context).lastMonth,
                 style: TextStyle(
                   fontSize: isCompact ? 9 : 10,
                   color: Colors.grey[400],

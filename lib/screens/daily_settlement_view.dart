@@ -526,7 +526,7 @@ class _DailySettlementViewState extends State<DailySettlementView> with Automati
                   children: [
                     SizedBox(height: topRowHeight, child: _wrapChartTap(context, AppLocalizations.of(context).numberOfGamesWinLoss, _gamesChartCard)),
                     SizedBox(height: spacing),
-                    SizedBox(height: bottomRowHeight, child: _wrapChartTap(context, 'Weekly Profit', _commissionChartCard)),
+                    SizedBox(height: bottomRowHeight, child: _wrapChartTap(context, AppLocalizations.of(context).weeklyProfit, _commissionChartCard)),
                     SizedBox(height: spacing),
                     SizedBox(height: bottomRowHeight, child: _wrapChartTap(context, AppLocalizations.of(context).junketExpenses, _expensesChartCard)),
                   ],
@@ -545,7 +545,7 @@ class _DailySettlementViewState extends State<DailySettlementView> with Automati
                     height: bottomRowHeight,
                     child: Row(
                       children: [
-                        Expanded(child: _wrapChartTap(context, 'Weekly Profit', _commissionChartCard)),
+                        Expanded(child: _wrapChartTap(context, AppLocalizations.of(context).weeklyProfit, _commissionChartCard)),
                         SizedBox(width: spacing),
                         Expanded(child: _wrapChartTap(context, AppLocalizations.of(context).junketExpenses, _expensesChartCard)),
                       ],
@@ -657,7 +657,7 @@ class _DailySettlementViewState extends State<DailySettlementView> with Automati
               _legendDot(primaryIndigo),
               SizedBox(width: isCompact ? 4 : 6),
               Text(
-                'This Week',
+                AppLocalizations.of(context).thisWeek,
                 style: TextStyle(
                   fontSize: isCompact ? 9 : 10,
                   color: Colors.grey[400],
@@ -668,7 +668,7 @@ class _DailySettlementViewState extends State<DailySettlementView> with Automati
               _legendDot(Colors.grey.shade500),
               SizedBox(width: isCompact ? 4 : 6),
               Text(
-                'Last Week',
+                AppLocalizations.of(context).lastWeek,
                 style: TextStyle(
                   fontSize: isCompact ? 9 : 10,
                   color: Colors.grey[400],
@@ -915,7 +915,7 @@ class _DailySettlementViewState extends State<DailySettlementView> with Automati
             children: [
               Icon(Icons.handshake, size: isCompact ? 16 : 18, color: amberAccent),
               SizedBox(width: isCompact ? 6 : 8),
-              Expanded(child: Text('Weekly Profit', style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white))),
+              Expanded(child: Text(AppLocalizations.of(context).weeklyProfit, style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white))),
               if (isExpanded && onClose != null)
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -936,7 +936,7 @@ class _DailySettlementViewState extends State<DailySettlementView> with Automati
               _legendDot(amberAccent),
               SizedBox(width: isCompact ? 4 : 6),
               Text(
-                'This Week',
+                AppLocalizations.of(context).thisWeek,
                 style: TextStyle(
                   fontSize: isCompact ? 9 : 10,
                   color: Colors.grey[400],
@@ -947,7 +947,7 @@ class _DailySettlementViewState extends State<DailySettlementView> with Automati
               _legendDot(Colors.grey.shade500),
               SizedBox(width: isCompact ? 4 : 6),
               Text(
-                'Last Week',
+                AppLocalizations.of(context).lastWeek,
                 style: TextStyle(
                   fontSize: isCompact ? 9 : 10,
                   color: Colors.grey[400],

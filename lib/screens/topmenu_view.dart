@@ -17,12 +17,14 @@ class TopMenuView extends StatefulWidget {
     this.branchId = '0',
     this.startDate,
     this.endDate,
+    this.compactCards = false,
   });
 
   /// Branch id for analytics; `0` = all branches.
   final String branchId;
   final DateTime? startDate;
   final DateTime? endDate;
+  final bool compactCards;
 
   @override
   State<TopMenuView> createState() => _TopMenuViewState();
@@ -102,9 +104,8 @@ class _TopMenuViewState extends State<TopMenuView> {
     }
     final mq = MediaQuery.of(context);
     final width = mq.size.width;
-    final height = mq.size.height;
-    final isTabletLandscape = width > height && width >= 600;
-    final gridParams = _gridParamsForWidth(width, isTabletLandscape);
+    final isLandscape = mq.orientation == Orientation.landscape;
+    final gridParams = _gridParamsForWidth(width, isLandscape, widget.compactCards);
     final horizontalPadding = _horizontalPaddingForWidth(width);
     final bottomInset = width < 1024 ? 80.0 + mq.padding.bottom : 24.0;
     final scrollContent = CustomScrollView(
@@ -181,10 +182,10 @@ class _TopMenuViewState extends State<TopMenuView> {
   }
 
   Widget _buildSkeletonContent(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final height = MediaQuery.sizeOf(context).height;
-    final isTabletLandscape = width > height && width >= 600;
-    final gridParams = _gridParamsForWidth(width, isTabletLandscape);
+    final mq = MediaQuery.of(context);
+    final width = mq.size.width;
+    final isLandscape = mq.orientation == Orientation.landscape;
+    final gridParams = _gridParamsForWidth(width, isLandscape, widget.compactCards);
     final horizontalPadding = _horizontalPaddingForWidth(width);
     final skeletonScroll = CustomScrollView(
       slivers: [
@@ -279,17 +280,20 @@ class _GridParams {
   final double spacing;
 }
 
-const double _kMenuCardContentHeight = 220.0;
+const double _kMenuCardContentHeightPortrait = 220.0;
+const double _kMenuCardContentHeightLandscape = 270.0;
+const double _kMenuCardContentHeightPortraitCompact = 220.0;
+const double _kMenuCardContentHeightLandscapeCompact = 210.0;
 
-_GridParams _gridParamsForWidth(double width, bool isTabletLandscape) {
+_GridParams _gridParamsForWidth(double width, bool isLandscape, bool compactCards) {
   final spacing = width < 500 ? 10.0 : (width >= 1000 ? 14.0 : 12.0);
   final horizontalPad = _horizontalPaddingForWidth(width) * 2;
   int cols;
-  if (isTabletLandscape) {
+  if (isLandscape && width >= 600) {
     cols = 2;
   } else if (width < 500) {
     cols = 2;
-  } else if (width >= 600 && !isTabletLandscape) {
+  } else if (width >= 600) {
     cols = 2;
   } else if (width < 700) {
     cols = 2;
@@ -299,7 +303,9 @@ _GridParams _gridParamsForWidth(double width, bool isTabletLandscape) {
     cols = 4;
   }
   final cardWidth = (width - horizontalPad - spacing * (cols - 1)) / cols;
-  final contentHeight = isTabletLandscape ? 320.0 : _kMenuCardContentHeight;
+  final contentHeight = compactCards
+      ? (isLandscape ? _kMenuCardContentHeightLandscapeCompact : _kMenuCardContentHeightPortraitCompact)
+      : (isLandscape ? _kMenuCardContentHeightLandscape : _kMenuCardContentHeightPortrait);
   final aspectRatio = cardWidth / contentHeight;
   return _GridParams(crossAxisCount: cols, aspectRatio: aspectRatio, spacing: spacing);
 }
