@@ -119,11 +119,11 @@ class _TopMenuViewState extends State<TopMenuView> {
         SliverPadding(
           padding: EdgeInsets.only(bottom: 16, left: horizontalPadding, right: horizontalPadding),
           sliver: SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: gridParams.crossAxisCount,
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: gridParams.maxCrossAxisExtent,
               mainAxisSpacing: gridParams.spacing,
               crossAxisSpacing: gridParams.spacing,
-              childAspectRatio: gridParams.aspectRatio,
+              mainAxisExtent: gridParams.mainAxisExtent,
             ),
             delegate: SliverChildBuilderDelegate(
               (context, i) {
@@ -160,24 +160,67 @@ class _TopMenuViewState extends State<TopMenuView> {
   }
 
   Widget _buildTopMenu(BuildContext context, AppLocalizations l10n, int total) {
-    return Row(
-      children: [
-        Icon(Icons.restaurant_menu, color: primaryIndigo, size: 28),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            l10n.menuTitle,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        Text(
-          '${l10n.menuTotalItems} ',
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.grey[400]),
-        ),
-        Text('$total', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compactHeader = constraints.maxWidth < 560;
+        if (compactHeader) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.restaurant_menu, color: primaryIndigo, size: 24),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.menuTitle,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${l10n.menuTotalItems} ',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[400]),
+                    ),
+                    Text(
+                      '$total',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }
+        return Row(
+          children: [
+            Icon(Icons.restaurant_menu, color: primaryIndigo, size: 28),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                l10n.menuTitle,
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Text(
+              '${l10n.menuTotalItems} ',
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.grey[400]),
+            ),
+            Text('$total', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+          ],
+        );
+      },
     );
   }
 
@@ -211,11 +254,11 @@ class _TopMenuViewState extends State<TopMenuView> {
         SliverPadding(
           padding: EdgeInsets.only(left: horizontalPadding, right: horizontalPadding),
           sliver: SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: gridParams.crossAxisCount,
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: gridParams.maxCrossAxisExtent,
               mainAxisSpacing: gridParams.spacing,
               crossAxisSpacing: gridParams.spacing,
-              childAspectRatio: gridParams.aspectRatio,
+              mainAxisExtent: gridParams.mainAxisExtent,
             ),
             delegate: SliverChildBuilderDelegate(
               (context, i) => Container(
@@ -271,43 +314,31 @@ class _TopMenuViewState extends State<TopMenuView> {
 
 class _GridParams {
   const _GridParams({
-    required this.crossAxisCount,
-    required this.aspectRatio,
+    required this.maxCrossAxisExtent,
+    required this.mainAxisExtent,
     required this.spacing,
   });
-  final int crossAxisCount;
-  final double aspectRatio;
+  final double maxCrossAxisExtent;
+  final double mainAxisExtent;
   final double spacing;
 }
 
 const double _kMenuCardContentHeightPortrait = 220.0;
-const double _kMenuCardContentHeightLandscape = 270.0;
+const double _kMenuCardContentHeightLandscape = 204.0;
 const double _kMenuCardContentHeightPortraitCompact = 220.0;
-const double _kMenuCardContentHeightLandscapeCompact = 210.0;
+const double _kMenuCardContentHeightLandscapeCompact = 192.0;
 
 _GridParams _gridParamsForWidth(double width, bool isLandscape, bool compactCards) {
   final spacing = width < 500 ? 10.0 : (width >= 1000 ? 14.0 : 12.0);
-  final horizontalPad = _horizontalPaddingForWidth(width) * 2;
-  int cols;
-  if (isLandscape && width >= 600) {
-    cols = 2;
-  } else if (width < 500) {
-    cols = 2;
-  } else if (width >= 600) {
-    cols = 2;
-  } else if (width < 700) {
-    cols = 2;
-  } else if (width < 1000) {
-    cols = 3;
-  } else {
-    cols = 4;
-  }
-  final cardWidth = (width - horizontalPad - spacing * (cols - 1)) / cols;
-  final contentHeight = compactCards
+  final maxCrossAxisExtent = width < 600 ? 280.0 : (width < 1000 ? 320.0 : 340.0);
+  final baseHeight = compactCards
       ? (isLandscape ? _kMenuCardContentHeightLandscapeCompact : _kMenuCardContentHeightPortraitCompact)
       : (isLandscape ? _kMenuCardContentHeightLandscape : _kMenuCardContentHeightPortrait);
-  final aspectRatio = cardWidth / contentHeight;
-  return _GridParams(crossAxisCount: cols, aspectRatio: aspectRatio, spacing: spacing);
+  final extraHeight = isLandscape
+      ? (width < 700 ? 28.0 : 22.0)
+      : (width < 420 ? 54.0 : (width < 700 ? 40.0 : 22.0));
+  final mainAxisExtent = baseHeight + extraHeight;
+  return _GridParams(maxCrossAxisExtent: maxCrossAxisExtent, mainAxisExtent: mainAxisExtent, spacing: spacing);
 }
 
 double _horizontalPaddingForWidth(double width) {
@@ -332,19 +363,22 @@ class _MenuDataCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final salesRatio = maxTotalSales <= 0 ? 0.0 : (item.totalSales / maxTotalSales).clamp(0.0, 1.0);
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor),
-        color: cardBg,
-      ),
-      child: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrowCard = constraints.maxWidth < 250;
+        final compactVertical = isNarrowCard || isLandscape;
+        return Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: borderColor),
+            color: cardBg,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -370,8 +404,8 @@ class _MenuDataCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     item.name,
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: TextStyle(
+                      fontSize: isNarrowCard ? 16 : 18,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
                       letterSpacing: 0.2,
@@ -382,7 +416,7 @@ class _MenuDataCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 18),
+            SizedBox(height: compactVertical ? 12 : 18),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -434,7 +468,7 @@ class _MenuDataCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: compactVertical ? 4 : 8),
             Row(
               children: [
                 Expanded(
@@ -442,6 +476,7 @@ class _MenuDataCard extends StatelessWidget {
                     icon: Icons.payments_rounded,
                     label: l10n.menuPrice,
                     value: _currencyFmt.format(item.price),
+                    compact: isNarrowCard,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -450,11 +485,12 @@ class _MenuDataCard extends StatelessWidget {
                     icon: Icons.receipt_long_rounded,
                     label: l10n.menuTotalOrders,
                     value: '${item.totalOrders}',
+                    compact: isNarrowCard,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: compactVertical ? 2 : 6),
             Row(
               children: [
                 Icon(Icons.bar_chart_rounded, size: 12, color: Colors.grey[500]),
@@ -481,15 +517,21 @@ class _MenuDataCard extends StatelessWidget {
                 ),
               ],
             ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _statPill({required IconData icon, required String label, required String value}) {
+  Widget _statPill({
+    required IconData icon,
+    required String label,
+    required String value,
+    bool compact = false,
+  }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: compact ? 6 : 8, vertical: compact ? 4 : 6),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
@@ -497,8 +539,8 @@ class _MenuDataCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: primaryIndigo.withValues(alpha: 0.8)),
-          const SizedBox(width: 6),
+          Icon(icon, size: compact ? 14 : 16, color: primaryIndigo.withValues(alpha: 0.8)),
+          SizedBox(width: compact ? 4 : 6),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -506,14 +548,14 @@ class _MenuDataCard extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: Colors.grey[500]),
+                  style: TextStyle(fontSize: compact ? 8 : 9, fontWeight: FontWeight.w600, color: Colors.grey[500]),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: TextStyle(
+                    fontSize: compact ? 11 : 12,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),

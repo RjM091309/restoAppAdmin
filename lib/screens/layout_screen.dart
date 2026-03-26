@@ -929,8 +929,9 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
   }
 
   Widget _buildHeader(BuildContext context, bool isWide) {
+    final l10n = AppLocalizations.of(context);
     return Container(
-      height: 80,
+      height: isWide ? 80 : 72,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: appBarBackground.withValues(alpha: 0.3),
@@ -938,26 +939,34 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
       child: Row(
         children: [
           if (!isWide)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(color: primaryIndigo, borderRadius: BorderRadius.circular(8)),
-                  child: const Icon(Icons.dashboard, color: Colors.white, size: 18),
-                ),
-                const SizedBox(width: 8),
-                Text(AppLocalizations.of(context).headerTitleSalesMonthly, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
-              ],
+            Expanded(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(color: primaryIndigo, borderRadius: BorderRadius.circular(8)),
+                    child: const Icon(Icons.dashboard, color: Colors.white, size: 18),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.headerTitleSalesMonthly,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          if (!isWide) const Spacer(),
           if (isWide)
             Text(
               _viewLabel(context),
               style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: -0.5),
             ),
-          const Spacer(),
+          if (isWide) const Spacer(),
           if (isWide)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -975,9 +984,7 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    _isServerOnline
-                        ? AppLocalizations.of(context).systemStatusLive
-                        : AppLocalizations.of(context).systemStatusOffline,
+                    _isServerOnline ? l10n.systemStatusLive : l10n.systemStatusOffline,
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
@@ -988,11 +995,13 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                 ],
               ),
             ),
-          const SizedBox(width: 16),
+          if (isWide) const SizedBox(width: 16),
           IconButton(
-            tooltip: AppLocalizations.of(context).language,
+            tooltip: l10n.language,
             onPressed: () => setState(() => _languageOpen = true),
-            icon: const Icon(Icons.language, color: Colors.grey, size: 24),
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+            padding: const EdgeInsets.all(8),
+            icon: const Icon(Icons.language, color: Colors.grey, size: 22),
           ),
           if (!platform_init.isAndroid)
             IconButton(
@@ -1000,9 +1009,11 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                 setState(() => _notificationOpen = true);
                 _loadNotifications();
               },
+              constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+              padding: const EdgeInsets.all(8),
               icon: Stack(
                 children: [
-                  const Icon(Icons.notifications_none, color: Colors.grey, size: 24),
+                  const Icon(Icons.notifications_none, color: Colors.grey, size: 22),
                   if (_notifications.any((n) => !n.isRead))
                     Positioned(
                       top: 0,
@@ -1019,7 +1030,9 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
           if (!isWide)
             IconButton(
               onPressed: () => setState(() => _profileOpen = true),
-              icon: CircleAvatar(radius: 18, backgroundColor: primaryIndigo, child: const Icon(Icons.person, size: 18, color: Colors.white)),
+              constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+              padding: const EdgeInsets.all(8),
+              icon: CircleAvatar(radius: 16, backgroundColor: primaryIndigo, child: const Icon(Icons.person, size: 16, color: Colors.white)),
             ),
         ],
       ),
