@@ -325,7 +325,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get commission => '커미션';
 
   @override
-  String get totalChips => 'ESSOM';
+  String get totalChips => 'ESSOME';
 
   @override
   String get cashBalance => '김형제';
@@ -397,7 +397,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get noBranchesToday => '영업 중인 매장 없음';
 
   @override
-  String get branchEssom => 'ESSOM';
+  String get branchEssom => 'ESSOME';
 
   @override
   String get branchKimHyungje => '김형제';

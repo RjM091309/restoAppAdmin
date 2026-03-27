@@ -126,6 +126,29 @@ class _RealTimeViewState extends State<RealTimeView> {
     super.dispose();
   }
 
+  String _localizedBranchName(AppLocalizations l10n, String rawName) {
+    final name = rawName.trim().toLowerCase();
+    if (name.contains('kim')) return l10n.branchKimHyungje;
+    if (name.contains('blue moon')) return l10n.branchBlueMoon;
+    if (name.contains('daraejung') || name.contains('daraejeong')) {
+      return l10n.branchDaraejeong;
+    }
+    if (name.contains('eesome')) return l10n.branchEssom;
+    if (name.contains('paik')) return l10n.branchGeumhoBanjeom;
+    return rawName;
+  }
+
+  int _branchDisplayOrder(String rawName) {
+    final name = rawName.trim().toLowerCase();
+    if (name.contains('kim')) return 0; // 1st
+    if (name.contains('blue moon')) return 1; // 2nd
+    if (name.contains('daraejung') || name.contains('daraejeong')) return 2; // 3rd
+    if (name.contains('eesome')) return 3; // 4th
+    if (name.contains('paik') || name.contains('keumho') || name.contains('geumho')) return 4; // 5th
+    if (name.contains('3core')) return 5; // 6th
+    return 999;
+  }
+
   Widget _buildSkeletonContent(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
@@ -319,14 +342,11 @@ class _RealTimeViewState extends State<RealTimeView> {
                         totalExpenses: 0,
                         totalOrders: 0,
                       )).toList();
+              // Keep card positions stable across refreshes.
               final sortedBranchCards = [...branchCards]..sort((a, b) {
-                final profitA = a.totalSales - a.totalExpenses;
-                final profitB = b.totalSales - b.totalExpenses;
-                final byProfit = profitB.compareTo(profitA);
-                if (byProfit != 0) return byProfit;
-                final byName = a.name.toLowerCase().compareTo(b.name.toLowerCase());
-                if (byName != 0) return byName;
-                return a.id.compareTo(b.id);
+                final byOrder = _branchDisplayOrder(a.name).compareTo(_branchDisplayOrder(b.name));
+                if (byOrder != 0) return byOrder;
+                return a.name.toLowerCase().compareTo(b.name.toLowerCase());
               });
               final crossAxisCount = w > 600 ? 3 : 2;
               final isTabletWidth = w > 600 && w <= 1400;
@@ -367,7 +387,7 @@ class _RealTimeViewState extends State<RealTimeView> {
                   Icons.location_city,
                   Icons.apartment,
                 ];
-                final name = branch.name;
+                final name = _localizedBranchName(l10n, branch.name);
                 return _wrapStatCardTap(
                   context,
                   branch.id.toString(),

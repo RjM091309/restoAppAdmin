@@ -725,7 +725,7 @@ abstract class AppLocalizations {
   /// No description provided for @totalChips.
   ///
   /// In en, this message translates to:
-  /// **'ESSOM'**
+  /// **'ESSOME'**
   String get totalChips;
 
   /// No description provided for @cashBalance.
@@ -869,13 +869,13 @@ abstract class AppLocalizations {
   /// No description provided for @branchEssom.
   ///
   /// In en, this message translates to:
-  /// **'ESSOM'**
+  /// **'ESSOME'**
   String get branchEssom;
 
   /// No description provided for @branchKimHyungje.
   ///
   /// In en, this message translates to:
-  /// **'Kim Hyung-je'**
+  /// **'Kim\'s brothers'**
   String get branchKimHyungje;
 
   /// No description provided for @branchBlueMoon.
@@ -887,13 +887,13 @@ abstract class AppLocalizations {
   /// No description provided for @branchDaraejeong.
   ///
   /// In en, this message translates to:
-  /// **'Daraejeong'**
+  /// **'Daraejung'**
   String get branchDaraejeong;
 
   /// No description provided for @branchGeumhoBanjeom.
   ///
   /// In en, this message translates to:
-  /// **'KeumHo'**
+  /// **'Paik\'s coffee'**
   String get branchGeumhoBanjeom;
 
   /// No description provided for @branchNew.

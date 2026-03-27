@@ -327,7 +327,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commission => 'COMMISSION';
 
   @override
-  String get totalChips => 'ESSOM';
+  String get totalChips => 'ESSOME';
 
   @override
   String get cashBalance => 'Kim\'s B';
@@ -399,19 +399,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noBranchesToday => 'No branches active';
 
   @override
-  String get branchEssom => 'ESSOM';
+  String get branchEssom => 'ESSOME';
 
   @override
-  String get branchKimHyungje => 'Kim Hyung-je';
+  String get branchKimHyungje => 'Kim\'s brothers';
 
   @override
   String get branchBlueMoon => 'Blue Moon';
 
   @override
-  String get branchDaraejeong => 'Daraejeong';
+  String get branchDaraejeong => 'Daraejung';
 
   @override
-  String get branchGeumhoBanjeom => 'KeumHo';
+  String get branchGeumhoBanjeom => 'Paik\'s coffee';
 
   @override
   String get branchNew => 'New';
