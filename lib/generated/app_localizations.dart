@@ -836,6 +836,24 @@ abstract class AppLocalizations {
   /// **'Sales / Month'**
   String get sales;
 
+  /// No description provided for @branchTotalSalesHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Total sales'**
+  String get branchTotalSalesHead;
+
+  /// No description provided for @branchProfitShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit'**
+  String get branchProfitShort;
+
+  /// No description provided for @branchExpensesShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get branchExpensesShort;
+
   /// No description provided for @expenses.
   ///
   /// In en, this message translates to:

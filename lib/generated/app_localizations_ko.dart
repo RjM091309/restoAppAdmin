@@ -382,6 +382,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get sales => '매출 / 월';
 
   @override
+  String get branchTotalSalesHead => '총 매출';
+
+  @override
+  String get branchProfitShort => '순익';
+
+  @override
+  String get branchExpensesShort => '지출';
+
+  @override
   String get expenses => '지출 / 월';
 
   @override

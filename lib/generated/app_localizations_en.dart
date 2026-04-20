@@ -384,6 +384,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sales => 'Sales / Month';
 
   @override
+  String get branchTotalSalesHead => 'Total sales';
+
+  @override
+  String get branchProfitShort => 'Profit';
+
+  @override
+  String get branchExpensesShort => 'Expenses';
+
+  @override
   String get expenses => 'Expenditure / Month';
 
   @override
